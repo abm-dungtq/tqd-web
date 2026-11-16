@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Quy trình vận hành 6 chặng — TQD Web Studio",
+    "subtitle": "Từ mô tả đời thường đến website chuẩn SEO, kiểm định 3 màn hình và cẩm nang tự sửa",
+    "description": "Luồng phối hợp giữa Chủ website, bộ điều phối tqd-web và dàn kỹ năng chuyên biệt kèm 2 vòng duyệt mẫu & tự sửa lỗi.",
+    "locale": "vi",
+    "visual_preset": "classic",
+    "theme": "light",
+    "animation": "trace",
+    "views": [
+      {
+        "id": "ch1-discover",
+        "title": "1. Khám phá & chọn cấp ngầm",
+        "narrative": "Hỏi 3-4 câu ngắn bằng ngôn ngữ đời thường, khóa brief.md và chọn ngầm kiến trúc Cấp 1, 2 hoặc 3.",
+        "focus_nodes": ["p1-brief"]
+      },
+      {
+        "id": "ch2-foundation",
+        "title": "2. Nhận diện & nội dung chuẩn Việt",
+        "narrative": "Thiết lập bảng màu 60/30/10, cặp chữ tiếng Việt sắc nét và nội dung bán hàng vượt cổng biên tập viet-pro.",
+        "focus_nodes": ["p2-design", "p2-content", "p3-preview"]
+      },
+      {
+        "id": "ch3-build",
+        "title": "3. Dựng trang & tách dữ liệu dễ sửa",
+        "narrative": "Sau khi duyệt mẫu Hero bằng mắt, hệ thống dựng trọn bộ trang, đồng bộ dữ liệu 2 chiều và nối nhánh Web App nếu cần.",
+        "focus_nodes": ["p3-preview", "p4-build", "p4-app"]
+      },
+      {
+        "id": "ch4-ship",
+        "title": "4. Kiểm định 3 màn hình & xuất bản",
+        "narrative": "Quét lỗi trên điện thoại, tablet, máy tính cùng giám khảo độc lập trước khi lên mạng miễn phí và bàn giao cẩm nang sửa.",
+        "focus_nodes": ["p5-audit", "p6-live"]
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "owner", "label": "Chủ website", "role": "approver" },
+    { "id": "studio", "label": "Điều phối tqd-web", "role": "orchestrator" },
+    { "id": "engines", "label": "Kỹ năng & Kiểm định", "role": "worker" }
+  ],
+  "steps": [
+    {
+      "id": "p1-brief",
+      "lane": "studio",
+      "kind": "start",
+      "label": "1. Hỏi 3-4 câu ngắn",
+      "description": "Hỏi nhu cầu bằng ngôn ngữ đời thường, ghi brief.md và tự chọn Cấp 1 (HTML tĩnh), Cấp 2 (Astro/Next) hoặc Cấp 3 (Web App)."
+    },
+    {
+      "id": "p2-design",
+      "lane": "engines",
+      "kind": "subprocess",
+      "label": "2a. Màu & chữ Việt",
+      "description": "tqd-web-design phối màu 60/30/10, chọn cặp font tiếng Việt không cắt dấu, vẽ logo SVG và sinh tokens.css."
+    },
+    {
+      "id": "p2-content",
+      "lane": "engines",
+      "kind": "subprocess",
+      "label": "2b. Bài & viet-pro",
+      "description": "tqd-web-content tích hợp viet-pro viết chữ bán hàng, bài chuẩn Google/AI và chống sáo ngữ."
+    },
+    {
+      "id": "p3-preview",
+      "lane": "owner",
+      "kind": "decision",
+      "label": "3. Duyệt mẫu Hero?",
+      "description": "Mở bản dựng phần đầu trang thật trên trình duyệt để chủ web xem tận mắt màu sắc và bố cục trước khi dựng toàn trang."
+    },
+    {
+      "id": "p4-build",
+      "lane": "studio",
+      "kind": "action",
+      "label": "4a. Dựng & đồng bộ",
+      "description": "web-builder dựng các trang còn lại, đồng bộ dữ liệu 2 chiều qua sync-site-data.mjs và tạo HUONG-DAN-SUA-WEB.md."
+    },
+    {
+      "id": "p4-app",
+      "lane": "engines",
+      "kind": "subprocess",
+      "label": "4b. App & VietQR",
+      "description": "tqd-web-app (nhánh tùy chọn Cấp 3): tích hợp đăng nhập, cơ sở dữ liệu serverless và thanh toán SePay/VietQR/Stripe."
+    },
+    {
+      "id": "p5-audit",
+      "lane": "engines",
+      "kind": "decision",
+      "label": "5. Đạt 3 màn hình?",
+      "description": "tqd-web-audit cùng visual-ux-critic kiểm tra tràn khung, độ tương phản, JSON-LD và liên kết Zalo/SĐT trên 3 kích cỡ màn hình."
+    },
+    {
+      "id": "p6-live",
+      "lane": "owner",
+      "kind": "terminal-success",
+      "label": "6. Xuất bản & giao",
+      "description": "tqd-web-launch gắn form miễn phí, đưa web lên Cloudflare/Vercel và trao launch-report.md kèm cẩm nang tự sửa."
+    }
+  ],
+  "transitions": [
+    { "from": "p1-brief", "to": "p2-design" },
+    { "from": "p1-brief", "to": "p2-content" },
+    { "from": "p2-design", "to": "p3-preview" },
+    { "from": "p2-content", "to": "p3-preview" },
+    { "from": "p3-preview", "to": "p4-build", "label": "Ưng", "condition": "ok", "kind": "branch-true" },
+    { "from": "p3-preview", "to": "p4-app", "kind": "normal" },
+    { "from": "p3-preview", "to": "p2-design", "label": "Đổi màu / bố cục", "condition": "revise", "kind": "retry" },
+    { "from": "p4-build", "to": "p5-audit" },
+    { "from": "p4-app", "to": "p5-audit" },
+    { "from": "p5-audit", "to": "p4-build", "label": "Tự sửa lỗi hiển thị", "condition": "fix", "kind": "retry" },
+    { "from": "p5-audit", "to": "p6-live", "label": "Đạt", "condition": "clean", "kind": "branch-true" }
+  ]
+}
