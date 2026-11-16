@@ -177,4 +177,5 @@ test('robots groups, markdown URLs, head parsing and args', () => {
   assert.throws(() => parseArgs(['https://x.dev', '--sample', '-1']));
   assert.equal(parseArgs(['http://localhost:3000', '--site-origin', 'https://x.dev/a']).siteOrigin, 'https://x.dev');
   assert.throws(() => parseArgs(['http://localhost:3000', '--site-origin', 'x.dev']));
+  assert.equal(parseArgs(['--help']).help, true);
 });

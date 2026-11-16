@@ -208,21 +208,30 @@ ${inputs}
   }
 }
 
+function printCheckoutHelp() {
+  console.log('Usage: node checkout-helper.js <platform> <config-json>');
+  console.log('\nPlatforms:');
+  console.log('  sepay  - SePay checkout form generation');
+  console.log('  polar  - Polar checkout session configuration');
+  console.log('\nExamples:');
+  console.log('\nSePay:');
+  console.log('  node checkout-helper.js sepay \'{"orderInvoiceNumber":"ORD001","orderAmount":100000,"successUrl":"https://example.com/success","errorUrl":"https://example.com/error","cancelUrl":"https://example.com/cancel"}\'');
+  console.log('\nPolar:');
+  console.log('  node checkout-helper.js polar \'{"productId":"prod_xxx","successUrl":"https://example.com/success","externalCustomerId":"user_123"}\'');
+}
+
 // CLI Usage
 if (require.main === module) {
   const args = process.argv.slice(2);
 
+  if (args.includes('-h') || args.includes('--help')) {
+    printCheckoutHelp();
+    process.exit(0);
+  }
+
   if (args.length < 2) {
-    console.log('Usage: node checkout-helper.js <platform> <config-json>');
-    console.log('\nPlatforms:');
-    console.log('  sepay  - SePay checkout form generation');
-    console.log('  polar  - Polar checkout session configuration');
-    console.log('\nExamples:');
-    console.log('\nSePay:');
-    console.log('  node checkout-helper.js sepay \'{"orderInvoiceNumber":"ORD001","orderAmount":100000,"successUrl":"https://example.com/success","errorUrl":"https://example.com/error","cancelUrl":"https://example.com/cancel"}\'');
-    console.log('\nPolar:');
-    console.log('  node checkout-helper.js polar \'{"productId":"prod_xxx","successUrl":"https://example.com/success","externalCustomerId":"user_123"}\'');
-    process.exit(1);
+    printCheckoutHelp();
+    process.exit(2);
   }
 
   try {

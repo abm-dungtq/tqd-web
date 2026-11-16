@@ -171,10 +171,27 @@ test('sync-brand-to-tokens.cjs generates design-tokens.json and tokens.css clean
     assert.match(css, /--paper: #FAF8F5;/);
     assert.match(css, /--ink: #1C1917;/);
     assert.match(css, /--leading-display: 1\.2;/);
+    assert.match(css, /--step-5:/);
+    assert.match(css, /--space-8: 64px;/);
+    assert.match(css, /--container: 1200px;/);
+    assert.match(css, /--section-y:/);
+    assert.match(css, /--accent-deep:/);
+    assert.match(css, /--shadow-1:/);
+    assert.match(css, /--dur-enter: 700ms;/);
     assert.match(css, /"Lora"/);
     assert.match(css, /"Be Vietnam Pro"/);
     assert.match(css, /prefers-reduced-motion: reduce/);
   });
+});
+
+test('render-check.mjs --help prints usage and exits 0 without launching browser', () => {
+  const renderScript = join(scriptsDir, 'render-check.mjs');
+  const res = spawnSync(process.execPath, [renderScript, '--help'], {
+    encoding: 'utf8',
+    env: { ...process.env, CHROME_PATH: '/nonexistent' },
+  });
+  assert.equal(res.status, 0, res.stderr);
+  assert.match(res.stdout, /usage: node render-check\.mjs/);
 });
 
 test('sync-brand-to-tokens.cjs works with minimal Quick Reference brand.md', () => {

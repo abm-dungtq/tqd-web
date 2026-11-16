@@ -3,10 +3,11 @@ name: tqd-web
 description: "Orchestrate end-to-end website design, content, visual preview, quality checks, and publishing for non-technical creators. Use when building a new website or full redesign from scratch; not for single-phase tasks such as only visual styling (tqd-web-design), copy/SEO (tqd-web-content), health audits (tqd-web-audit), hosting/forms (tqd-web-launch), or opt-in app backends (tqd-web-app)."
 when_to_use: "Invoke when taking a website from an everyday idea to a live site with a plain-language edit guide; route single-phase requests straight to their tqd-web-* owner."
 argument-hint: "[mo ta website] [--auto] [--from <phase>]"
+compatibility: "macOS, Linux, Windows (Node.js >= 20)"
 license: "MIT"
 metadata:
   author: tqd
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # tqd-web: Studio Thiết Kế Website Cho Người Không Chuyên
@@ -70,7 +71,9 @@ Build the primary Hero and 2–3 signature sections using real copy and `tokens.
 
 ### Phase 4: Full build and editable content layer
 
-Delegate or build every remaining page in `sitemap.md`, attach zero-server customer contact channels (Zalo, click-to-call, static lead form via `tqd-web-launch`), and generate `HUONG-DAN-SUA-WEB.md` from `references/edit-guide-template.md` so the owner knows exactly where to edit words, prices, photos, and phone numbers.
+Delegate or build every remaining page in `sitemap.md`:
+- For Tier 1 sites, clone and customize `assets/tier1-starter/` (pre-populated Vietnamese HTML + `data/site-data.js` with `data-edit` attributes for instant `file://` preview) and run `node scripts/sync-site-data.mjs <site-dir>` so static HTML, Open Graph metadata, JSON-LD, and `llms.txt` match `data/site-data.js`.
+- Attach zero-server customer contact channels (Zalo, click-to-call, static lead form via `tqd-web-launch`), and generate `HUONG-DAN-SUA-WEB.md` from `references/edit-guide-template.md` so the owner knows exactly where to edit words, prices, photos, and phone numbers.
 
 ### Phase 5: Health audit and isolated visual review
 
@@ -84,8 +87,10 @@ Work through `references/launch-checklist.md` together with `tqd-web-launch`. De
 
 Pause and ask the owner before buying a domain or paid plan, changing live DNS, deploying to a live custom domain, enabling live payment keys, or deleting existing website data. Keep secrets and API tokens out of git-tracked files and reports.
 
-## References
+## References and Assets
 
+- `assets/tier1-starter/` — ready-to-customize Tier 1 Vietnamese HTML5 starter with `styles/tokens.css`, `styles/site.css`, `data/site-data.js` (`data-edit`), `404.html`, `robots.txt`, `sitemap.xml`, `llms.txt`, `llms-full.txt`, and `index.html.md`
+- `scripts/sync-site-data.mjs` — Node.js (`>= 20`, macOS/Linux/Windows) sandboxed tool syncing `data/site-data.js` back into static HTML, Open Graph, JSON-LD, and `llms.txt` (`scripts/tests/sync-site-data.test.mjs`)
 - `references/discovery-questions-vn.md` — 4 conversational Vietnamese discovery prompts and brief template
 - `references/stack-tiers-and-content-separation.md` — silent Tier 1/2/3 decision rules and `content/` separation patterns
 - `references/edit-guide-template.md` — plain-language `HUONG-DAN-SUA-WEB.md` blueprint for non-technical owners

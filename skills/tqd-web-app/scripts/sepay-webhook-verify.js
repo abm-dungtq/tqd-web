@@ -229,17 +229,26 @@ class SePayWebhookVerifier {
   }
 }
 
+function printSepayHelp() {
+  console.log('Usage: node sepay-webhook-verify.js <webhook-payload-json>');
+  console.log('\nEnvironment Variables:');
+  console.log('  SEPAY_WEBHOOK_AUTH_TYPE - hmac, api_key, oauth2, none (default: none)');
+  console.log('  SEPAY_WEBHOOK_SECRET    - HMAC-SHA256 secret key (hmac)');
+  console.log('  SEPAY_WEBHOOK_API_KEY   - API key (api_key)');
+}
+
 // CLI Usage
 if (require.main === module) {
   const args = process.argv.slice(2);
 
+  if (args.includes('-h') || args.includes('--help')) {
+    printSepayHelp();
+    process.exit(0);
+  }
+
   if (args.length === 0) {
-    console.log('Usage: node sepay-webhook-verify.js <webhook-payload-json>');
-    console.log('\nEnvironment Variables:');
-    console.log('  SEPAY_WEBHOOK_AUTH_TYPE - hmac, api_key, oauth2, none (default: none)');
-    console.log('  SEPAY_WEBHOOK_SECRET    - HMAC-SHA256 secret key (hmac)');
-    console.log('  SEPAY_WEBHOOK_API_KEY   - API key (api_key)');
-    process.exit(1);
+    printSepayHelp();
+    process.exit(2);
   }
 
   try {

@@ -17,13 +17,20 @@ const DEFAULT_VIEWPORTS = '375x812,768x1024,1440x900';
 const MAX_SHOT_HEIGHT = 16000;
 
 function parseArgs(argv) {
-  const opts = { target: null, out: 'render-check', viewports: DEFAULT_VIEWPORTS };
+  const opts = { target: null, out: 'render-check', viewports: DEFAULT_VIEWPORTS, help: false };
   for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === '--out') opts.out = argv[++i];
+    if (argv[i] === '-h' || argv[i] === '--help') opts.help = true;
+    else if (argv[i] === '--out') opts.out = argv[++i];
     else if (argv[i] === '--viewports') opts.viewports = argv[++i];
     else if (!opts.target) opts.target = argv[i];
   }
   return opts;
+}
+
+function printHelp() {
+  console.log('usage: node render-check.mjs <file.html|url> [--out dir] [--viewports 375x812,768x1024,1440x900]');
+  console.log('\nRender a page across viewports in headless Chrome/Edge/Chromium and save full-page PNG screenshots + render-report.json.');
+  console.log('\nExit codes: 0 no errors found, 1 errors found, 2 could not run.');
 }
 
 function findBrowser() {
@@ -290,6 +297,7 @@ async function checkViewport(cdp, sessionId, url, width, height, outDir) {
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
+  if (opts.help) { printHelp(); return; }
   if (!opts.target) { console.error('usage: node render-check.mjs <file.html|url> [--out dir] [--viewports 375x812,768x1024,1440x900]'); process.exit(2); }
   if (typeof WebSocket === 'undefined') { console.error('render-check needs Node 22 or newer (global WebSocket).'); process.exit(2); }
   const browserPath = findBrowser();

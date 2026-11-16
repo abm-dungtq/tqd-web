@@ -14,13 +14,12 @@ Người dùng không chuyên không cần biết trang web chạy bằng HTML t
 
 Dù chạy Tier 1 hay Tier 2, dữ liệu kinh doanh hay thay đổi không được chôn sâu rải rác trong hàng trăm dòng code giao diện.
 
-### Với Tier 1 (HTML5 + CSS Tokens)
-1. Tách mọi màu sắc, cỡ chữ, khoảng cách vào `styles/tokens.css`.
-2. Nếu trang có danh sách lặp (thực đơn món, bảng giá gói, câu hỏi thường gặp, thông tin liên hệ dùng nhiều nơi), gom vào một file dữ liệu rõ ràng (hoặc các khối HTML đánh dấu chú thích tiếng Việt rõ ràng):
-   - Đặt chú thích tiếng Việt trực tiếp cạnh nơi sửa, ví dụ:
-     `<!-- SUA-NHANH: Sửa số điện thoại và link Zalo ngay tại đây -->`
-   - Hoặc tách biến cấu hình đơn giản trong `content/site-config.json` / `data/site-data.js` (lưu ý nếu mở bằng `file://` trực tiếp không qua server, nhúng dữ liệu vào `data/site-data.js` dạng biến toàn cục `window.SITE_DATA = { ... }` để tránh lỗi CORS khi bấm đúp mở `index.html`!).
-   - Đây là chi tiết thực tế quan trọng: `fetch('data.json')` trên `file://` bị trình duyệt chặn CORS, khiến người không chuyên mở `index.html` thấy trang trắng! Với Tier 1 thuần HTML, luôn dùng dữ liệu render sẵn trong HTML hoặc `data/site-data.js` để bấm đúp mở được ngay lập tức.
+### Với Tier 1 (HTML5 + CSS Tokens + `assets/tier1-starter/`)
+1. Tách màu sắc, cỡ chữ và khoảng cách vào `styles/tokens.css` (giữ luật bố cục riêng trong `styles/site.css` để cập nhật bảng màu không làm mất khung).
+2. Dùng bộ khung `assets/tier1-starter/` làm nền tảng chuẩn:
+   - Văn bản thật nằm sẵn trong `index.html` để Google và xem trước Zalo/Facebook đọc trọn vẹn 100% không cần JavaScript.
+   - Đồng thời gắn thuộc tính `data-edit`, `data-edit-tel`, `data-edit-href` nối với `window.SITE_DATA` trong `data/site-data.js` để chủ web bấm đúp mở `index.html` trên máy (`file://`) là thấy ngay nội dung vừa sửa mà không dính lỗi CORS của `fetch('data.json')`.
+   - Chạy `node scripts/sync-site-data.mjs <thu-muc-web>` sau khi chỉnh `data/site-data.js` để đồng bộ ngược lại vào `<title>`, thẻ Open Graph, HTML tĩnh, JSON-LD và `llms.txt` trước khi xuất bản.
 
 ### Với Tier 2 (Astro / Next.js)
 1. Cấu trúc chuẩn thư mục dễ hiểu:

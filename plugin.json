@@ -8,10 +8,11 @@
     "Thiết kế lại giao diện website hiện tại cho sang trọng, dễ xem trên điện thoại và chuẩn Google",
     "Kiểm tra lỗi hiển thị, tốc độ tải trang và viết thêm bài chuẩn SEO cho website của mình"
   ],
-  "version": "2.0.0",
+  "version": "2.1.0",
   "author": {
     "name": "TQD",
     "url": "https://tqd.me"
   },
-  "homepage": "https://tqd.me"
+  "homepage": "https://tqd.me",
+  "repository": "https://github.com/abm-dungtq/tqd-web"
 }

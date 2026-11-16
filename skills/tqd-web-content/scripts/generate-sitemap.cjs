@@ -46,14 +46,23 @@ ${lastmod}    <changefreq>${changefreq}</changefreq>
   return outputPath;
 }
 
+function printHelp() {
+  console.log('Usage: node generate-sitemap.cjs <base-url> <output-path> [--pages pages.json]');
+  console.log('Example: node generate-sitemap.cjs https://example.com ./sitemap.xml');
+}
+
 // CLI handling
 if (require.main === module) {
   const args = process.argv.slice(2);
 
+  if (args.includes('-h') || args.includes('--help')) {
+    printHelp();
+    process.exit(0);
+  }
+
   if (args.length < 2) {
-    console.log('Usage: node generate-sitemap.cjs <base-url> <output-path> [--pages pages.json]');
-    console.log('Example: node generate-sitemap.cjs https://example.com ./sitemap.xml');
-    process.exit(1);
+    printHelp();
+    process.exit(2);
   }
 
   const baseUrl = args[0].replace(/\/$/, '');
@@ -62,10 +71,26 @@ if (require.main === module) {
 
   let pages = [{ url: '/', priority: '1.0', changefreq: 'daily' }];
 
-  if (pagesIndex !== -1 && args[pagesIndex + 1]) {
+  if (pagesIndex !== -1) {
     const pagesFile = args[pagesIndex + 1];
-    if (fs.existsSync(pagesFile)) {
-      pages = JSON.parse(fs.readFileSync(pagesFile, 'utf-8'));
+    if (!pagesFile || pagesFile.startsWith('-')) {
+      console.error('Error: --pages requires a file path');
+      process.exit(2);
+    }
+    if (!fs.existsSync(pagesFile)) {
+      console.error(`Error: pages file not found: ${pagesFile}`);
+      process.exit(2);
+    }
+    try {
+      const parsed = JSON.parse(fs.readFileSync(pagesFile, 'utf-8'));
+      if (!Array.isArray(parsed)) {
+        console.error(`Error: pages file must contain a JSON array: ${pagesFile}`);
+        process.exit(2);
+      }
+      pages = parsed;
+    } catch (err) {
+      console.error(`Error: failed to parse JSON from ${pagesFile}: ${err.message}`);
+      process.exit(2);
     }
   }
 

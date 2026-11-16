@@ -208,16 +208,25 @@ class PolarWebhookVerifier {
   }
 }
 
+function printPolarHelp() {
+  console.log('Usage: node polar-webhook-verify.js <webhook-payload-json> [webhook-secret]');
+  console.log('\nWebhook secret can also be provided via POLAR_WEBHOOK_SECRET environment variable');
+  console.log('\nExample:');
+  console.log('  node polar-webhook-verify.js \'{"type":"order.paid","data":{...}}\' whsec_xxx');
+}
+
 // CLI Usage
 if (require.main === module) {
   const args = process.argv.slice(2);
 
+  if (args.includes('-h') || args.includes('--help')) {
+    printPolarHelp();
+    process.exit(0);
+  }
+
   if (args.length < 1) {
-    console.log('Usage: node polar-webhook-verify.js <webhook-payload-json> [webhook-secret]');
-    console.log('\nWebhook secret can also be provided via POLAR_WEBHOOK_SECRET environment variable');
-    console.log('\nExample:');
-    console.log('  node polar-webhook-verify.js \'{"type":"order.paid","data":{...}}\' whsec_xxx');
-    process.exit(1);
+    printPolarHelp();
+    process.exit(2);
   }
 
   try {

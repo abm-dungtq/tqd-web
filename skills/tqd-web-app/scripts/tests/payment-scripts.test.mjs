@@ -1,9 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+import { join, dirname } from 'node:path';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
+const scriptsDir = dirname(dirname(fileURLToPath(import.meta.url)));
 const SePayWebhookVerifier = require('../sepay-webhook-verify.js');
 const PolarWebhookVerifier = require('../polar-webhook-verify.js');
 const CheckoutHelper = require('../checkout-helper.js');
@@ -355,4 +359,12 @@ test('CheckoutHelper: generates Polar sandbox/production checkout configs and va
     () => CheckoutHelper.generatePolarCheckout({ productId: 'prod_123', successUrl: '/success' }),
     /successUrl must be an absolute URL/
   );
+});
+
+test('Payment CLI scripts handle --help with exit code 0', () => {
+  for (const name of ['sepay-webhook-verify.js', 'polar-webhook-verify.js', 'checkout-helper.js']) {
+    const res = spawnSync(process.execPath, [join(scriptsDir, name), '--help'], { encoding: 'utf8' });
+    assert.equal(res.status, 0, `${name} --help failed: ${res.stderr}`);
+    assert.match(res.stdout, /Usage:/);
+  }
 });

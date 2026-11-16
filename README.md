@@ -49,19 +49,19 @@ Sao chép hoặc liên kết thư mục kho này vào `~/.gemini/config/plugins/
 
 ### 2. Claude Code
 ```bash
-/plugin marketplace add /Volumes/1/AGY/tqd-web
+/plugin marketplace add abm-dungtq/tqd-web
 /plugin install tqd-web@tqd-studio
 ```
 
 ### 3. Gemini CLI
-Cài đặt trực tiếp từ thư mục gốc có tệp `gemini-extension.json`:
+Cài đặt trực tiếp từ GitHub hoặc thư mục kho có tệp `gemini-extension.json`:
 ```bash
-gemini extensions install /Volumes/1/AGY/tqd-web
+gemini extensions install https://github.com/abm-dungtq/tqd-web
 ```
 
 ---
 
 ## Tài liệu kiểm toán kiến trúc & Giấy phép
 
-- Xem chi tiết quá trình phản biện và tái cấu trúc từ 19 skill cũ lên phiên bản 2.0 tại [docs/audit-report.md](docs/audit-report.md).
+- Xem chi tiết quá trình phản biện và tái cấu trúc từ 19 skill cũ lên phiên bản 2.1 tại [docs/audit-report.md](docs/audit-report.md).
 - Phân phối theo giấy phép **MIT** ([LICENSE.txt](LICENSE.txt) và [NOTICE.txt](NOTICE.txt)).

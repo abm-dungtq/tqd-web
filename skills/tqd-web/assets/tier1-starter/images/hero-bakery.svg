@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 400" width="560" height="400" fill="none" role="img" aria-label="Minh họa bánh mì nướng thủ công nóng giòn">
+  <rect width="560" height="400" rx="20" fill="#F1EDE6" />
+  <circle cx="280" cy="200" r="136" fill="#FEF3C7" />
+  <ellipse cx="280" cy="236" rx="146" ry="74" fill="#D97706" />
+  <ellipse cx="280" cy="222" rx="134" ry="62" fill="#F59E0B" />
+  <path d="M210 206C232 186 254 186 276 206" stroke="#92400E" stroke-width="8" stroke-linecap="round" />
+  <path d="M266 198C288 178 310 178 332 198" stroke="#92400E" stroke-width="8" stroke-linecap="round" />
+  <path d="M236 132C236 112 252 104 252 88" stroke="#1D5B4C" stroke-width="6" stroke-linecap="round" />
+  <path d="M280 122C280 102 296 94 296 78" stroke="#1D5B4C" stroke-width="6" stroke-linecap="round" />
+  <path d="M324 132C324 112 340 104 340 88" stroke="#1D5B4C" stroke-width="6" stroke-linecap="round" />
+</svg>

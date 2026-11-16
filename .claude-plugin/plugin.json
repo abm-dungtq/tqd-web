@@ -1,10 +1,12 @@
 {
   "name": "tqd-web",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Zero-knowledge A-to-Z website design, content, SEO, audit, and launch studio.",
   "author": {
     "name": "TQD",
     "url": "https://tqd.me"
   },
+  "homepage": "https://tqd.me",
+  "repository": "https://github.com/abm-dungtq/tqd-web",
   "license": "MIT"
 }

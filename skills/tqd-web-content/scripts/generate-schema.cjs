@@ -131,21 +131,43 @@ function generateSchema(type, data = {}) {
   return generator(data);
 }
 
+function printHelp() {
+  console.log('Usage: node generate-schema.cjs <type> [--data data.json] [--output schema.json]');
+  console.log('Types: article, faq, product, howto, organization, localbusiness, breadcrumb');
+}
+
 // CLI
 if (require.main === module) {
   const args = process.argv.slice(2);
+  if (args.includes('-h') || args.includes('--help')) {
+    printHelp();
+    process.exit(0);
+  }
   if (args.length < 1) {
-    console.log('Usage: node generate-schema.cjs <type> [--data data.json] [--output schema.json]');
-    console.log('Types: article, faq, product, howto, organization, localbusiness, breadcrumb');
-    process.exit(1);
+    printHelp();
+    process.exit(2);
   }
 
   const type = args[0];
   const dataIndex = args.indexOf('--data');
   let data = {};
 
-  if (dataIndex !== -1 && args[dataIndex + 1]) {
-    data = JSON.parse(fs.readFileSync(args[dataIndex + 1], 'utf-8'));
+  if (dataIndex !== -1) {
+    const dataFile = args[dataIndex + 1];
+    if (!dataFile || dataFile.startsWith('-')) {
+      console.error('Error: --data requires a JSON file path');
+      process.exit(2);
+    }
+    if (!fs.existsSync(dataFile)) {
+      console.error(`Error: data file not found: ${dataFile}`);
+      process.exit(2);
+    }
+    try {
+      data = JSON.parse(fs.readFileSync(dataFile, 'utf-8'));
+    } catch (err) {
+      console.error(`Error: failed to parse JSON from ${dataFile}: ${err.message}`);
+      process.exit(2);
+    }
   }
 
   const schema = generateSchema(type, data);

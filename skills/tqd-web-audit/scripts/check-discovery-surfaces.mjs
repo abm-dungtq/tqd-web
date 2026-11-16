@@ -21,15 +21,17 @@ const AI_OTHER_AGENTS = ['ChatGPT-User', 'Claude-User', 'Perplexity-User', 'GPTB
 const MIN_SERVER_TEXT = 200;
 
 export function parseArgs(argv) {
-  const opts = { base: null, siteOrigin: null, sample: 10, json: false, timeout: 10000 };
+  const opts = { base: null, siteOrigin: null, sample: 10, json: false, timeout: 10000, help: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === '--sample') opts.sample = Number(argv[++i]);
+    if (a === '-h' || a === '--help') opts.help = true;
+    else if (a === '--sample') opts.sample = Number(argv[++i]);
     else if (a === '--timeout') opts.timeout = Number(argv[++i]);
     else if (a === '--json') opts.json = true;
     else if (a === '--site-origin') opts.siteOrigin = argv[++i] ?? '';
     else if (!opts.base) opts.base = a;
   }
+  if (opts.help) return opts;
   if (!opts.base) throw new Error('missing <base-url>');
   if (!Number.isInteger(opts.sample) || opts.sample < 0) throw new Error('--sample must be a non-negative integer');
   if (!Number.isInteger(opts.timeout) || opts.timeout <= 0) throw new Error('--timeout must be a positive integer (ms)');
@@ -333,6 +335,11 @@ async function main() {
   try { opts = parseArgs(process.argv.slice(2)); } catch (err) {
     console.error(`${err.message}\nUsage: node check-discovery-surfaces.mjs <base-url> [--site-origin <url>] [--sample 10] [--json] [--timeout 10000]`);
     process.exitCode = 2;
+    return;
+  }
+  if (opts.help) {
+    console.log('Usage: node check-discovery-surfaces.mjs <base-url> [--site-origin <url>] [--sample 10] [--json] [--timeout 10000]');
+    process.exitCode = 0;
     return;
   }
   try {

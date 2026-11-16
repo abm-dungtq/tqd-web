@@ -179,6 +179,58 @@ function normalizeText(value) {
   return value.replace(/\s+/g, ' ').trim();
 }
 
+const DUMMY_PHONE_RE = /^(?:0?9x+|0?90{7,9}|0?123456789|0?912345678|0?901234567|1234567890|0{7,}|9{7,}|.*xxx.*)$/i;
+
+function checkContactLink(rawHref, line, add) {
+  if (/^tel:/i.test(rawHref)) {
+    const number = rawHref.slice(4).trim();
+    if (!number) {
+      add('error', 'contact-link', line, 'tel: link has empty phone number');
+      return;
+    }
+    if (/\s/.test(number)) {
+      add('error', 'contact-link', line, `tel: link "${rawHref}" contains spaces; strip spaces inside href while keeping readable display text`);
+    }
+    const digits = number.replace(/[^\da-zA-Z]/g, '');
+    if (DUMMY_PHONE_RE.test(digits) || /[<>{}\[\]]/.test(number)) {
+      add('error', 'contact-link', line, `tel: link "${rawHref}" looks like an unreplaced placeholder number`);
+    }
+  } else if (/^https?:\/\/(?:www\.)?zalo\.me\//i.test(rawHref)) {
+    const slug = rawHref.replace(/^https?:\/\/(?:www\.)?zalo\.me\//i, '').split(/[?#]/)[0].trim();
+    const digits = slug.replace(/[^\da-zA-Z]/g, '');
+    if (!slug || DUMMY_PHONE_RE.test(digits) || /[<>{}\[\]]/.test(slug)) {
+      add('error', 'contact-link', line, `Zalo link "${rawHref}" looks like an unreplaced placeholder target`);
+    }
+  }
+}
+
+function validateJsonLdText(rawText, line, add) {
+  const trimmed = rawText.trim();
+  if (!trimmed) {
+    add('error', 'json-ld', line, 'JSON-LD <script> block is empty');
+    return;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(trimmed);
+  } catch (err) {
+    add('error', 'json-ld', line, `invalid JSON-LD syntax: ${err.message}`);
+    return;
+  }
+  const nodes = Array.isArray(parsed)
+    ? parsed
+    : Array.isArray(parsed?.['@graph'])
+      ? parsed['@graph']
+      : [parsed];
+  const hasRootContext = Boolean(parsed && typeof parsed === 'object' && parsed['@context']);
+  for (const node of nodes) {
+    if (!node || typeof node !== 'object' || !node['@type'] || (!hasRootContext && !node['@context'])) {
+      add('error', 'json-ld', line, 'JSON-LD object must include both @context and @type');
+      break;
+    }
+  }
+}
+
 function scanPlaceholders(text, line, strictPlaceholders, findings, fileLabel, seen) {
   if (!text) return;
   const nfc = text.normalize('NFC');
@@ -242,6 +294,7 @@ export function analyzeHtml(html, fileLabel = 'index.html', options = {}) {
     if (tok.type === 'raw') {
       if (tok.tag === 'script' && (tok.attrs.type || '').toLowerCase().includes('ld+json')) {
         scanPlaceholders(tok.text, tok.line, strictPlaceholders, findings, fileLabel, seenPlaceholders);
+        validateJsonLdText(tok.text, tok.line, add);
       }
       continue;
     }
@@ -322,7 +375,11 @@ export function analyzeHtml(html, fileLabel = 'index.html', options = {}) {
         }
       }
     } else if (tag === 'a' || tag === 'area') {
-      if (attrs.href !== undefined) links.push({ kind: 'page', raw: attrs.href.trim(), line });
+      if (attrs.href !== undefined) {
+        const rawHref = attrs.href.trim();
+        links.push({ kind: 'page', raw: rawHref, line });
+        checkContactLink(rawHref, line, add);
+      }
     } else if (tag === 'link') {
       const rels = (attrs.rel ?? '').toLowerCase().split(/\s+/).filter(Boolean);
       const skip = rels.some((r) => SKIP_LINK_RELS.has(r));

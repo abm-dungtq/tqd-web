@@ -7,7 +7,7 @@ compatibility: "macOS, Linux, Windows (Node.js >= 20)"
 license: "MIT"
 metadata:
   author: tqd
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # tqd-web-launch: Go Live with Zero Server Cost

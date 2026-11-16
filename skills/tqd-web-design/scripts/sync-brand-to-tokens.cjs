@@ -32,6 +32,7 @@ Options:
   -b, --brand <file>      Input brand markdown file (default: docs/website/brand.md)
       --json-out <file>   Output JSON token path (default: design-tokens.json)
       --css-out <file>    Output CSS token path (default: tokens.css)
+      --vars-only         Emit :root custom properties and reduced-motion block only
       --dry-run           Print parsed colors and preview without writing files
   -h, --help              Show this help message
 
@@ -300,6 +301,7 @@ function buildDesignTokens(brandData) {
         accent: { $value: `{primitive.color.${aName}.500}`, $type: 'color' },
         'accent-hover': { $value: `{primitive.color.${aName}.600}`, $type: 'color' },
         'accent-soft': { $value: `{primitive.color.${aName}.100}`, $type: 'color' },
+        'accent-deep': { $value: `{primitive.color.${aName}.800}`, $type: 'color' },
         'accent-ink': { $value: pickOnColor(colors.accent.base), $type: 'color' },
         'on-primary': { $value: pickOnColor(colors.primary.base), $type: 'color' },
         paper: { $value: neutral.paper, $type: 'color' },
@@ -307,6 +309,7 @@ function buildDesignTokens(brandData) {
         line: { $value: neutral.line, $type: 'color' },
         ink: { $value: neutral.ink, $type: 'color' },
         'ink-2': { $value: neutral.ink2, $type: 'color' },
+        'ink-3': { $value: mixHex(neutral.ink2, neutral.paper, 0.35), $type: 'color' },
       },
       typography: {
         'font-display': { $value: '{primitive.font.display}', $type: 'fontFamily' },
@@ -348,7 +351,8 @@ function resolveTokenRef(value, tokens) {
   return value;
 }
 
-function generateCssFromTokens(tokens) {
+function generateCssFromTokens(tokens, options = {}) {
+  const varsOnly = Boolean(options.varsOnly);
   const lines = [
     `/* Generated from brand.md by sync-brand-to-tokens.cjs (${tokens.brand}) */`,
     ':root {',
@@ -363,7 +367,10 @@ function generateCssFromTokens(tokens) {
 
   lines.push('');
   lines.push('  /* Semantic surfaces, ink, and accents */');
-  const bareAliases = new Set(['paper', 'paper-2', 'line', 'ink', 'ink-2', 'accent', 'accent-hover', 'accent-soft', 'accent-ink']);
+  const bareAliases = new Set([
+    'paper', 'paper-2', 'line', 'ink', 'ink-2', 'ink-3',
+    'accent', 'accent-hover', 'accent-soft', 'accent-deep', 'accent-ink',
+  ]);
   const colorMirrors = new Set(['accent', 'accent-hover', 'accent-soft']);
   for (const [key, token] of Object.entries(tokens.semantic?.color || {})) {
     const resolved = resolveTokenRef(token.$value, tokens);
@@ -375,37 +382,87 @@ function generateCssFromTokens(tokens) {
     }
   }
 
-  const deduped = lines;
-
-  deduped.push('');
-  deduped.push('  /* Vietnamese-safe typography & layout defaults */');
+  lines.push('');
+  lines.push('  /* Vietnamese-safe fluid typography & measure */');
   for (const [key, token] of Object.entries(tokens.semantic?.typography || {})) {
-    deduped.push(`  --${key}: ${resolveTokenRef(token.$value, tokens)};`);
+    lines.push(`  --${key}: ${resolveTokenRef(token.$value, tokens)};`);
   }
-  deduped.push('  --tracking-display: -0.02em;');
-  deduped.push('  --radius: 10px;');
-  deduped.push('  --radius-sm: 6px;');
-  deduped.push('  --dur-press: 120ms;');
-  deduped.push('  --dur-state: 240ms;');
-  deduped.push('  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);');
+  lines.push('  --step--1: clamp(0.83rem, 0.8rem + 0.15vw, 0.9rem);');
+  lines.push('  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);');
+  lines.push('  --step-1: clamp(1.25rem, 1.15rem + 0.45vw, 1.5rem);');
+  lines.push('  --step-2: clamp(1.56rem, 1.38rem + 0.9vw, 2rem);');
+  lines.push('  --step-3: clamp(1.95rem, 1.6rem + 1.7vw, 2.75rem);');
+  lines.push('  --step-4: clamp(2.44rem, 1.8rem + 3.2vw, 4rem);');
+  lines.push('  --step-5: clamp(2.75rem, 1.6rem + 5.6vw, 4.75rem);');
+  lines.push('  --tracking-display: -0.02em;');
+  lines.push('  --tracking-caps: 0.08em;');
+  lines.push('  --measure: 62ch;');
 
-  deduped.push('');
-  deduped.push('  /* Component tokens */');
+  lines.push('');
+  lines.push('  /* 4pt spacing, layout rhythm & container */');
+  lines.push('  --space-1: 4px;');
+  lines.push('  --space-2: 8px;');
+  lines.push('  --space-3: 12px;');
+  lines.push('  --space-4: 16px;');
+  lines.push('  --space-5: 24px;');
+  lines.push('  --space-6: 32px;');
+  lines.push('  --space-7: 48px;');
+  lines.push('  --space-8: 64px;');
+  lines.push('  --space-9: 96px;');
+  lines.push('  --space-10: 128px;');
+  lines.push('  --section-y: clamp(64px, 6vw + 32px, 128px);');
+  lines.push('  --gutter: clamp(16px, 4vw, 48px);');
+  lines.push('  --container: 1200px;');
+
+  lines.push('');
+  lines.push('  /* Shape, depth & motion */');
+  lines.push('  --radius: 10px;');
+  lines.push('  --radius-sm: 6px;');
+  lines.push('  --shadow-1: 0 1px 2px rgba(24, 24, 27, 0.06), 0 4px 12px rgba(24, 24, 27, 0.07);');
+  lines.push('  --shadow-2: 0 2px 4px rgba(24, 24, 27, 0.06), 0 16px 40px rgba(24, 24, 27, 0.1);');
+  lines.push('  --dur-press: 120ms;');
+  lines.push('  --dur-state: 240ms;');
+  lines.push('  --dur-layout: 400ms;');
+  lines.push('  --dur-enter: 700ms;');
+  lines.push('  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);');
+  lines.push('  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);');
+
+  lines.push('');
+  lines.push('  /* Component tokens */');
   const btnPrimary = tokens.component?.button?.primary || {};
   const btnSecondary = tokens.component?.button?.secondary || {};
-  if (btnPrimary.bg) deduped.push(`  --btn-primary-bg: ${resolveTokenRef(btnPrimary.bg.$value, tokens)};`);
-  if (btnPrimary['bg-hover']) deduped.push(`  --btn-primary-bg-hover: ${resolveTokenRef(btnPrimary['bg-hover'].$value, tokens)};`);
-  if (btnPrimary.text) deduped.push(`  --btn-primary-text: ${resolveTokenRef(btnPrimary.text.$value, tokens)};`);
-  if (btnSecondary['bg-hover']) deduped.push(`  --btn-secondary-bg-hover: ${resolveTokenRef(btnSecondary['bg-hover'].$value, tokens)};`);
+  if (btnPrimary.bg) lines.push(`  --btn-primary-bg: ${resolveTokenRef(btnPrimary.bg.$value, tokens)};`);
+  if (btnPrimary['bg-hover']) lines.push(`  --btn-primary-bg-hover: ${resolveTokenRef(btnPrimary['bg-hover'].$value, tokens)};`);
+  if (btnPrimary.text) lines.push(`  --btn-primary-text: ${resolveTokenRef(btnPrimary.text.$value, tokens)};`);
+  if (btnSecondary['bg-hover']) lines.push(`  --btn-secondary-bg-hover: ${resolveTokenRef(btnSecondary['bg-hover'].$value, tokens)};`);
 
-  deduped.push('}');
-  deduped.push('');
-  deduped.push('@media (prefers-reduced-motion: reduce) {');
-  deduped.push('  :root { --dur-press: 0ms; --dur-state: 0ms; }');
-  deduped.push('}');
-  deduped.push('');
+  lines.push('}');
+  lines.push('');
+  lines.push('@media (prefers-reduced-motion: reduce) {');
+  lines.push('  :root { --dur-press: 0ms; --dur-state: 0ms; --dur-layout: 0ms; --dur-enter: 0ms; }');
+  lines.push('}');
 
-  return deduped.join('\n');
+  if (!varsOnly) {
+    lines.push('');
+    lines.push('body {');
+    lines.push('  font: 400 var(--step-0) / var(--leading-body) var(--font-body);');
+    lines.push('  color: var(--ink);');
+    lines.push('  background: var(--paper);');
+    lines.push('  -webkit-font-smoothing: antialiased;');
+    lines.push('}');
+    lines.push('h1, h2, h3 {');
+    lines.push('  font-family: var(--font-display);');
+    lines.push('  font-weight: 600;');
+    lines.push('  line-height: var(--leading-display);');
+    lines.push('  letter-spacing: var(--tracking-display);');
+    lines.push('  text-wrap: balance;');
+    lines.push('}');
+    lines.push('p { max-width: var(--measure); text-wrap: pretty; }');
+    lines.push(':focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }');
+  }
+  lines.push('');
+
+  return lines.join('\n');
 }
 
 function syncBrandToTokens(options) {
@@ -417,7 +474,7 @@ function syncBrandToTokens(options) {
   const content = fs.readFileSync(brandPath, 'utf8');
   const brandData = extractBrandData(content);
   const tokens = buildDesignTokens(brandData);
-  const css = generateCssFromTokens(tokens);
+  const css = generateCssFromTokens(tokens, { varsOnly: Boolean(options.varsOnly) });
 
   if (!options.dryRun) {
     const jsonOut = path.resolve(process.cwd(), options.jsonOut);
@@ -435,6 +492,7 @@ function parseCliArgs(argv) {
   const opts = {
     help: false,
     dryRun: false,
+    varsOnly: false,
     brand: null,
     jsonOut: 'design-tokens.json',
     cssOut: 'tokens.css',
@@ -446,6 +504,8 @@ function parseCliArgs(argv) {
       opts.help = true;
     } else if (arg === '--dry-run') {
       opts.dryRun = true;
+    } else if (arg === '--vars-only') {
+      opts.varsOnly = true;
     } else if (arg === '--brand' || arg === '-b') {
       opts.brand = argv[++i] || null;
     } else if (arg === '--json-out') {

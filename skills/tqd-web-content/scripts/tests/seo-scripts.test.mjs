@@ -140,3 +140,37 @@ test('validate-schema.cjs CLI exits 0 for valid JSON-LD and non-zero for invalid
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('generate-sitemap.cjs and generate-schema.cjs handle --help and missing input files cleanly', () => {
+  const sitemapPath = path.join(scriptsDir, 'generate-sitemap.cjs');
+  const schemaPath = path.join(scriptsDir, 'generate-schema.cjs');
+
+  const helpMap = spawnSync(process.execPath, [sitemapPath, '--help'], { encoding: 'utf8' });
+  assert.equal(helpMap.status, 0);
+  assert.match(helpMap.stdout, /Usage: node generate-sitemap\.cjs/);
+
+  const helpSchema = spawnSync(process.execPath, [schemaPath, '--help'], { encoding: 'utf8' });
+  assert.equal(helpSchema.status, 0);
+  assert.match(helpSchema.stdout, /Usage: node generate-schema\.cjs/);
+
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tqd-seo-err-'));
+  try {
+    const missingPages = spawnSync(
+      process.execPath,
+      [sitemapPath, 'https://example.com', path.join(dir, 'sitemap.xml'), '--pages', path.join(dir, 'missing.json')],
+      { encoding: 'utf8' }
+    );
+    assert.equal(missingPages.status, 2);
+    assert.match(missingPages.stderr, /pages file not found/);
+
+    const missingData = spawnSync(
+      process.execPath,
+      [schemaPath, 'article', '--data', path.join(dir, 'missing.json')],
+      { encoding: 'utf8' }
+    );
+    assert.equal(missingData.status, 2);
+    assert.match(missingData.stderr, /data file not found/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});

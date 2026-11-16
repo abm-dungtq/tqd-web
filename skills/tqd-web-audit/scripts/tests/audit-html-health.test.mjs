@@ -66,8 +66,8 @@ test('valid multi-page HTML build directory passes with zero findings', () => {
     <nav>
       <a href="/about">Giới thiệu</a>
       <a href="contact.html">Liên hệ</a>
-      <a href="tel:0901234567">Gọi ngay</a>
-      <a href="https://zalo.me/0901234567">Zalo</a>
+      <a href="tel:0905842619">Gọi ngay</a>
+      <a href="https://zalo.me/0905842619">Zalo</a>
       <a href="#menu">Thực đơn</a>
     </nav>
     <svg aria-hidden="true"><title>Icon Trang Trí</title></svg>
@@ -270,4 +270,27 @@ test('CLI runs via symlinked scripts directory and parseArgs/formatText helpers 
   assert.throws(() => parseArgs(['a', 'b']));
   const formatted = formatText(auditTarget({ target: cleanDir }));
   assert.match(formatted, /0 error\(s\), 0 warning\(s\)/);
+});
+
+test('flags invalid inline JSON-LD and dummy/spaced tel or Zalo contact links offline', () => {
+  const html = `<!doctype html>
+<html lang="vi">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop Test</title>
+  <meta name="description" content="Kiểm tra số điện thoại và JSON-LD.">
+  <script type="application/ld+json">{ invalid json</script>
+</head>
+<body>
+  <h1>Cửa hàng mẫu</h1>
+  <a href="tel:0905 842 619">Gọi ngay</a>
+  <a href="tel:0123456789">Số giả</a>
+  <a href="https://zalo.me/09xxxxxxxx">Zalo mẫu</a>
+</body>
+</html>`;
+  const page = analyzeHtml(html, 'contact-bad.html');
+  const jsonLdErrors = page.findings.filter((f) => f.check === 'json-ld' && f.severity === 'error');
+  const contactErrors = page.findings.filter((f) => f.check === 'contact-link' && f.severity === 'error');
+  assert.equal(jsonLdErrors.length, 1);
+  assert.equal(contactErrors.length, 3);
 });
