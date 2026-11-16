@@ -1,0 +1,13 @@
+{
+  "name": "tqd-studio",
+  "owner": {
+    "name": "TQD"
+  },
+  "plugins": [
+    {
+      "name": "tqd-web",
+      "source": "./",
+      "description": "Thiết kế website chất lượng cao từ A-Z cho người không biết code"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="none" role="img" aria-label="TQD Web Studio logo">
+  <defs>
+    <linearGradient id="tqd-frame" x1="36" y1="36" x2="220" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0F766E" />
+      <stop offset="100%" stop-color="#115E59" />
+    </linearGradient>
+    <linearGradient id="tqd-accent" x1="116" y1="92" x2="204" y2="188" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#EA580C" />
+    </linearGradient>
+  </defs>
+  <!-- Safe margin 32px around 192x192 emblem (32..224) -->
+  <rect x="34" y="42" width="188" height="172" rx="28" fill="url(#tqd-frame)" stroke="#F8FAFC" stroke-opacity="0.24" stroke-width="3" />
+  <!-- Browser top bar -->
+  <path d="M34 70C34 54.536 46.536 42 62 42H194C209.464 42 222 54.536 222 70V84H34V70Z" fill="#042F2E" fill-opacity="0.55" />
+  <circle cx="60" cy="63" r="6" fill="#F87171" />
+  <circle cx="80" cy="63" r="6" fill="#FBBF24" />
+  <circle cx="100" cy="63" r="6" fill="#34D399" />
+  <!-- Layout grid left column -->
+  <rect x="54" y="102" width="52" height="90" rx="12" fill="#F0FDFA" fill-opacity="0.92" />
+  <rect x="64" y="116" width="32" height="10" rx="5" fill="#0F766E" />
+  <rect x="64" y="136" width="24" height="7" rx="3.5" fill="#0F766E" fill-opacity="0.55" />
+  <rect x="64" y="150" width="28" height="7" rx="3.5" fill="#0F766E" fill-opacity="0.38" />
+  <rect x="64" y="168" width="32" height="14" rx="7" fill="url(#tqd-accent)" />
+  <!-- Editorial spark & visual block right column -->
+  <rect x="118" y="102" width="84" height="52" rx="12" fill="url(#tqd-accent)" />
+  <path d="M160 112L165.5 123.5L177 129L165.5 134.5L160 146L154.5 134.5L143 129L154.5 123.5L160 112Z" fill="#FFFBEB" />
+  <rect x="118" y="164" width="38" height="28" rx="9" fill="#CCFBF1" fill-opacity="0.9" />
+  <rect x="164" y="164" width="38" height="28" rx="9" fill="#99F6E4" fill-opacity="0.72" />
+</svg>

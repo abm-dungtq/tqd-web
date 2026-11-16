@@ -1,0 +1,17 @@
+{
+  "name": "tqd-web",
+  "displayName": "TQD Web Studio",
+  "description": "Thiết kế và xuất bản website chất lượng cao từ A đến Z dành cho người không biết lập trình: hỏi bằng ngôn ngữ đời thường, xem trước trực quan, chuẩn SEO và dễ tự sửa nội dung.",
+  "logo": "assets/logo.svg",
+  "suggestedPrompts": [
+    "Làm cho mình trang web giới thiệu cửa hàng, có bảng giá đẹp và nút nhắn Zalo đặt hàng",
+    "Thiết kế lại giao diện website hiện tại cho sang trọng, dễ xem trên điện thoại và chuẩn Google",
+    "Kiểm tra lỗi hiển thị, tốc độ tải trang và viết thêm bài chuẩn SEO cho website của mình"
+  ],
+  "version": "2.0.0",
+  "author": {
+    "name": "TQD",
+    "url": "https://tqd.me"
+  },
+  "homepage": "https://tqd.me"
+}

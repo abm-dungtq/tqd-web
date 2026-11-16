@@ -1,0 +1,15 @@
+TQD Web Studio (tqd-web v2.0)
+Copyright (c) 2026 TQD (https://tqd.me)
+
+Licensed under the MIT License (see LICENSE.txt).
+
+Historical & Upstream Attribution:
+During the v2.0 re-architecture, selected design-token starters, automated
+layout/SEO/discovery verification utilities, and webhook verification scripts
+were retained, adapted, and cleaned from the legacy tqd-* workspace forks
+originally derived from AgentKit skills (Copyright (c) 2026 AgentKit) and
+Anthropic open-source skill design patterns (Apache License, Version 2.0).
+
+All WordPress GPL-2.0 components, off-topic presentation slide assets, and
+runtime AgentKit dependencies present in the v1.x fork were completely removed
+in v2.0.
