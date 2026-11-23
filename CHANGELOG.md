@@ -7,6 +7,8 @@ Mọi thay đổi đáng chú ý của plugin `tqd-web` được ghi ở đây. 
 ### Thêm
 
 - `design-intel.mjs --refs <thư mục>` (hoặc `TQD_DESIGN_REFS`): xếp hạng thêm một thư mục DESIGN.md người dùng tự có (ví dụ export Refero Styles) theo thẻ thị giác và 0..n thẻ ngành; thiếu bằng chứng thì gán `unknown`. Thư mục phải nằm ngoài repo; plugin không kèm, không chuyển đổi nội dung bên thứ ba. Module mới `scripts/design-refs.mjs`, quy tắc ở `references/external-design-md.md`.
+- `scripts/design-refs-tag.mjs <thư mục>`: gắn thẻ offline và ghi `local-tags.json` vào chính thư mục refs; `design-intel --refs` dùng thẻ này nếu có. Cờ `--jev` (tắt mặc định, cần `TYPESAFE_API_KEY`) gửi phần mô tả (không gửi token/CSS) của file còn `unknown` cho TypeSafe Jev, mỗi ngành một câu hỏi noul nên một style có thể nhiều ngành. Đường Jev chỉ được test với server giả, chưa gọi API thật.
+- 5 test cho `design-refs-tag`: offline không gọi mạng, thiếu key thoát 2, Jev chỉ nhận file `unknown` và không nhận token, lỗi Jev giữ thẻ offline và thoát 1, `local-tags.json` hỏng làm `design-intel` thoát 1.
 - 7 test mới: fallback khi không khớp, và `--refs` trên 5 fixture tự viết (xếp hạng quán cà phê, ẩn dụ một lần không gán ngành, style `unknown` vẫn tìm được qua thẻ thị giác, nhiều ngành, biến môi trường, mã thoát lỗi).
 
 ### Sửa
@@ -16,7 +18,7 @@ Mọi thay đổi đáng chú ý của plugin `tqd-web` được ghi ở đây. 
 
 ### Ghi chú
 
-- `.gitignore` chặn `refero-styles/` và `design-refs/` để tránh lỡ commit thư viện bên thứ ba.
+- `.gitignore` chặn `refero-styles/`, `design-refs/` và `local-tags.json` để tránh lỡ commit thư viện bên thứ ba hoặc dữ liệu suy ra từ nó.
 
 ## [2.3.0] - 2026-11-23
 

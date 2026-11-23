@@ -24,6 +24,20 @@ Không gửi nội dung thư mục cho dịch vụ AI bên thứ ba (để phân
 - **Thẻ ngành** (0..n) lấy từ phần mở đầu + `## Imagery`, chỉ khi từ khoá lặp ≥ 2 lần. Một lần nhắc thường là ẩn dụ ("coffee-black", "gallery wall"). Không đủ bằng chứng thì gán `unknown`. File `unknown` vẫn được tìm qua thẻ thị giác: "tường gallery đen trên trắng" có thể hợp cho tiệm gốm, studio ảnh hay quán cà phê tối giản.
 - Đây là heuristic từ khoá, không phải phân loại có kiểm chứng. Luôn đọc lại file trước khi đề xuất.
 
+## Gắn thẻ trước một lần: `design-refs-tag.mjs`
+
+```bash
+node "${CLAUDE_SKILL_DIR}/scripts/design-refs-tag.mjs" "/đường/dẫn/ngoài/repo/refero-styles"
+```
+
+- Chạy offline, ghi `local-tags.json` vào **chính thư mục refs**, không ghi vào repo. Mỗi file có `industries` (0..n hoặc `unknown`), `visual`, `source`. Sau đó `design-intel --refs` đọc thẻ từ file này (`"localTags": true`, cột `ngành … (jev)` nếu nguồn là Jev). File hỏng thì `design-intel` thoát mã 1; xoá hoặc chạy lại.
+- Trên bộ Refero 1.341 file, heuristic để lại khoảng 76% `unknown` vì phần lớn mô tả là thẩm mỹ, không nói ngành.
+- `--jev` (tắt mặc định) gửi các file còn `unknown` cho TypeSafe Jev (`POST https://api.typesafe.ai/v1/systemone`, model `jev-latest`, cần `TYPESAFE_API_KEY`). Mỗi ngành là một câu hỏi noul riêng; nhận ngành khi xác suất ≥ `--threshold` (mặc định 0.7), nên một style có thể có nhiều ngành.
+  - Chỉ gửi tên, câu tóm tắt, đoạn mô tả và `## Imagery` (≤ 2.000 ký tự/file); không gửi token, CSS hay HTML mẫu.
+  - **Chỉ bật khi người giữ file đã xác nhận được phép gửi nội dung cho bên thứ ba.** Có phí theo token của TypeSafe.
+  - File gọi lỗi giữ thẻ offline kèm `jevError`; script vẫn ghi kết quả và thoát mã 1.
+  - Đường gọi Jev chỉ được test với server giả trong repo; chưa kiểm chứng với API thật.
+
 ## Chuyển thành thiết kế của khách
 
 1. Đọc tối đa 3 file được gợi ý, chỉ ở các mục **Tokens**, **Layout**, **Do's and Don'ts**. Không chép `Quick Start` CSS, HTML mẫu hay mô tả component nguyên văn.

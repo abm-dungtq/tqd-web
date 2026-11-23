@@ -11,4 +11,5 @@ evals/.results/
 # Thư viện DESIGN.md bên thứ ba (--refs) phải nằm ngoài repo; chặn nếu lỡ chép vào.
 refero-styles/
 design-refs/
+local-tags.json
 !skills/tqd-web-design/scripts/tests/fixtures/design-refs/

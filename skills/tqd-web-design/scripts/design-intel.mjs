@@ -358,6 +358,7 @@ function main() {
   if (loadedRefs) {
     result.references = {
       dir: refsDir,
+      localTags: loadedRefs.tagged,
       ...rankRefs(loadedRefs.refs, query, options.limit),
       note: 'Chỉ lấy cảm hứng cấu trúc (thang chữ, nhịp khoảng cách, kỷ luật màu); thay font bằng cặp có subset tiếng Việt, không chép tên, logo, ảnh, copy hay CSS nguyên văn. Xem references/external-design-md.md.',
     };
@@ -406,7 +407,7 @@ function main() {
     for (const ref of refs.matches) {
       lines.push(
         `- ${ref.name}: ${ref.tagline || '(không có mô tả)'}`,
-        `  ${ref.theme || '?'} · ${ref.density || '?'} · thị giác: ${ref.visual.join(', ') || '—'} · ngành: ${ref.industries.join(', ')}`,
+        `  ${ref.theme || '?'} · ${ref.density || '?'} · thị giác: ${ref.visual.join(', ') || '—'} · ngành: ${ref.industries.join(', ')}${ref.tagSource ? ` (${ref.tagSource})` : ''}`,
         `  màu: ${ref.accents.join(' ') || '—'} · font gốc: ${ref.fonts.join(', ') || '—'}`,
         `  file: ${ref.file}`,
       );

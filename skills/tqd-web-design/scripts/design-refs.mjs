@@ -1,15 +1,17 @@
 /**
  * Đọc thư mục DESIGN.md do người dùng tự cung cấp (ngoài repo) và xếp hạng theo
- * thẻ thị giác + thẻ ngành. Không gửi dữ liệu đi đâu, không ghi file.
+ * thẻ thị giác + thẻ ngành. Module này không gửi dữ liệu đi đâu và không ghi file;
+ * `design-refs-tag.mjs` là script riêng ghi `local-tags.json` vào chính thư mục đó.
  *
  * Một file có thể có nhiều ngành hoặc không ngành nào (`unknown`): mô tả thị giác
  * như "gallery wall of black-on-white objects" vẫn dùng được cho nhiều ngành.
  */
 
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 
 const MAX_FILE_BYTES = 512 * 1024;
+export const TAGS_FILE = 'local-tags.json';
 
 // Từ khoá đã bỏ dấu, viết thường. Cụm nhiều từ được so theo ranh giới từ.
 export const INDUSTRIES = {
@@ -91,6 +93,12 @@ function section(markdown, heading) {
   return end === -1 ? rest : rest.slice(0, end);
 }
 
+/** Phần mô tả (mở đầu + Imagery), bỏ token/CSS; là thứ duy nhất được gửi cho Jev khi bật. */
+export function describingExcerpt(markdown, limit = 2000) {
+  const intro = markdown.split(/^## /m)[0];
+  return [intro, section(markdown, 'Imagery')].join('\n').replace(/\n{3,}/g, '\n\n').trim().slice(0, limit);
+}
+
 export function parseDesignMd(markdown, file) {
   const name = (markdown.match(/^# (.+?)(?:\s+—\s+Style Reference)?\s*$/m) || [])[1]?.trim()
     || path.basename(file, '.md');
@@ -124,7 +132,19 @@ export function parseDesignMd(markdown, file) {
   };
 }
 
-export function loadRefs(dir) {
+function readTags(dir) {
+  const file = path.join(dir, TAGS_FILE);
+  if (!existsSync(file)) return { tags: null };
+  try {
+    const parsed = JSON.parse(readFileSync(file, 'utf8'));
+    if (!parsed || typeof parsed.files !== 'object') throw new Error('thiếu khoá "files"');
+    return { tags: parsed.files };
+  } catch (error) {
+    return { error: `${TAGS_FILE} lỗi (${error.message}); chạy lại design-refs-tag.mjs hoặc xoá file`, code: 1 };
+  }
+}
+
+export function loadRefs(dir, { useLocalTags = true } = {}) {
   let entries;
   try {
     if (!statSync(dir).isDirectory()) return { error: `--refs không phải thư mục: ${dir}`, code: 2 };
@@ -132,16 +152,24 @@ export function loadRefs(dir) {
   } catch {
     return { error: `không tìm thấy thư mục --refs: ${dir}`, code: 2 };
   }
+  const { tags, error, code } = useLocalTags ? readTags(dir) : { tags: null };
+  if (error) return { error, code };
   const refs = [];
   for (const entry of entries.sort()) {
     if (!entry.endsWith('.md') || entry.startsWith('_') || entry.startsWith('.')) continue;
     const file = path.join(dir, entry);
     const stats = statSync(file);
     if (!stats.isFile() || stats.size > MAX_FILE_BYTES) continue;
-    refs.push(parseDesignMd(readFileSync(file, 'utf8'), file));
+    const ref = parseDesignMd(readFileSync(file, 'utf8'), file);
+    const saved = tags?.[entry];
+    if (Array.isArray(saved?.industries) && saved.industries.length) {
+      ref.industries = saved.industries;
+      ref.tagSource = saved.source || TAGS_FILE;
+    }
+    refs.push(ref);
   }
   if (!refs.length) return { error: `không có file DESIGN.md (*.md) trong ${dir}`, code: 1 };
-  return { refs };
+  return { refs, tagged: Boolean(tags) };
 }
 
 // Cụm tiếng Việt → từ tiếng Anh thường gặp trong DESIGN.md, để xếp hạng trong cùng một ngành.
