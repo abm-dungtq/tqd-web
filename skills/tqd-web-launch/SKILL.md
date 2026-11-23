@@ -12,6 +12,9 @@ metadata:
 
 # tqd-web-launch: Go Live with Zero Server Cost
 
+> **Guardrails:** Follow [rules/AGENTS.md](../../rules/AGENTS.md), this plugin's always-on rules, in every reply. Read it once per session if it is not already in context.
+> **Paths:** This skill's folder is `${CLAUDE_SKILL_DIR}` (Claude Code fills this in; on other hosts use the absolute path of the folder that contains this file). Every `scripts/...` and `../<skill>/scripts/...` path below is relative to that folder, not to the website project: run `node "<skill folder>/scripts/<name>" <args>`.
+
 Help non-technical website owners take their finished site live cleanly with `$0` monthly hosting and zero-server lead capture. Translate technical terms (DNS records, CNAME, HTTPS, analytics snippets) into plain everyday outcomes when talking to the owner, and ask one focused question at a time whenever owner input is missing.
 
 ## When to Use and Handoffs

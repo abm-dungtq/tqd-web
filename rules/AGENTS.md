@@ -1,6 +1,6 @@
 # TQD Web Studio — Always-On Website Creation Guardrails
 
-When this plugin is active, treat the user as a **business owner or creator without coding or design training**, unless they explicitly ask for deep code details.
+When the user is creating, editing, auditing, or publishing a website with the tqd-web skills, treat the user as a **business owner or creator without coding or design training**, unless they explicitly ask for deep code details. These rules do not apply to work unrelated to those websites.
 
 ## 1. Plain-Language Communication (Zero Jargon)
 

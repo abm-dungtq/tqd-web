@@ -6,6 +6,8 @@
 
 **Phiên bản 2.1.0** · MIT · Antigravity IDE · Claude Code · Gemini CLI
 
+Luật chung nằm ở `rules/AGENTS.md`: Gemini CLI tự nạp, Claude Code nạp qua từng skill, Antigravity chưa kiểm chứng.
+
 Plugin giúp **người không biết lập trình hay thiết kế** tự tạo website đẹp, dễ xem trên điện thoại, chuẩn Google và dễ sửa nội dung về sau. Chỉ cần mô tả cửa hàng hoặc dịch vụ bằng lời hằng ngày, hệ thống tự xử lý từ phối màu, chữ tiếng Việt đến đưa web lên mạng.
 
 ---

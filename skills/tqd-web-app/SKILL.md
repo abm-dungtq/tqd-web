@@ -12,6 +12,9 @@ metadata:
 
 # TQD Web App (Tier 3 Opt-In)
 
+> **Guardrails:** Follow [rules/AGENTS.md](../../rules/AGENTS.md), this plugin's always-on rules, in every reply. Read it once per session if it is not already in context.
+> **Paths:** This skill's folder is `${CLAUDE_SKILL_DIR}` (Claude Code fills this in; on other hosts use the absolute path of the folder that contains this file). Every `scripts/...` and `../<skill>/scripts/...` path below is relative to that folder, not to the website project: run `node "<skill folder>/scripts/<name>" <args>`.
+
 Provide the opt-in Tier 3 web application branch only when a site genuinely needs user accounts, persistent database records, server APIs, or automated payment verification. Keep technical complexity invisible to non-technical owners while upholding server-side security and cost guardrails.
 
 ## When to Use and Hand-offs

@@ -12,6 +12,9 @@ metadata:
 
 # TQD Web Design: Visual Identity, Tokens, and Art-Directed UI
 
+> **Guardrails:** Follow [rules/AGENTS.md](../../rules/AGENTS.md), this plugin's always-on rules, in every reply. Read it once per session if it is not already in context.
+> **Paths:** This skill's folder is `${CLAUDE_SKILL_DIR}` (Claude Code fills this in; on other hosts use the absolute path of the folder that contains this file). Every `scripts/...` and `../<skill>/scripts/...` path below is relative to that folder, not to the website project: run `node "<skill folder>/scripts/<name>" <args>`.
+
 Translate plain-language business vibes ("ấm áp thủ công", "chuyên nghiệp đáng tin cho khách doanh nghiệp") into complete visual identities: color palettes, Vietnamese-safe typography, clean SVG logos, `tokens.css`, art-directed Hero previews, and responsive Tier 1 / Tier 2 UI layouts.
 
 ## Activation Boundary

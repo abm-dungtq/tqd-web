@@ -12,6 +12,9 @@ metadata:
 
 # TQD Web Content
 
+> **Guardrails:** Follow [rules/AGENTS.md](../../rules/AGENTS.md), this plugin's always-on rules, in every reply. Read it once per session if it is not already in context.
+> **Paths:** This skill's folder is `${CLAUDE_SKILL_DIR}` (Claude Code fills this in; on other hosts use the absolute path of the folder that contains this file). Every `scripts/...` and `../<skill>/scripts/...` path below is relative to that folder, not to the website project: run `node "<skill folder>/scripts/<name>" <args>`.
+
 Write real, persuasive, human-sounding website copy in plain Vietnamese (or the user's requested language) and structure every page for both Google Search and AI answer engines (GEO). Separate editable text, prices, and contact details cleanly into `docs/website/content/` and `src/content/` so non-technical business owners can update their site without touching HTML, CSS, or application code.
 
 This skill generates JSON-LD structured data and XML sitemaps as clean, framework-agnostic static files via bundled Node.js scripts without WP or PHP CMS plugins or external server dependencies.

@@ -13,7 +13,7 @@ Kho `/Volumes/1/AGY/tqd-web` trước đây chứa **19 thư mục skill rời**
 
 ## 3. Kiến trúc tái thiết lập v2.0
 
-Plugin mới gọn còn **1 luật luôn bật + 2 subagent nội bộ + 6 skill tự chủ**, cho web giới thiệu, bán hàng gọn, blog SEO và Web App tùy chọn.
+Plugin mới gọn còn **1 bộ luật chung (`rules/AGENTS.md`: Gemini CLI tự nạp; Claude Code nạp qua từng skill) + 2 subagent nội bộ + 6 skill tự chủ**, cho web giới thiệu, bán hàng gọn, blog SEO và Web App tùy chọn.
 
 | Thành phần v2.0 | Vai trò chính | Kế thừa từ v1 | Loại bỏ |
 |---|---|---|---|

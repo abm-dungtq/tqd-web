@@ -12,6 +12,9 @@ metadata:
 
 # tqd-web: Studio Thiết Kế Website Cho Người Không Chuyên
 
+> **Guardrails:** Follow [rules/AGENTS.md](../../rules/AGENTS.md), this plugin's always-on rules, in every reply. Read it once per session if it is not already in context.
+> **Paths:** This skill's folder is `${CLAUDE_SKILL_DIR}` (Claude Code fills this in; on other hosts use the absolute path of the folder that contains this file). Every `scripts/...` and `../<skill>/scripts/...` path below is relative to that folder, not to the website project: run `node "<skill folder>/scripts/<name>" <args>`.
+
 Guide a business owner or creator with zero coding or design background from an everyday description to a fast, authentic, search-ready website and a plain-language maintenance guide.
 
 ## When to use
@@ -72,7 +75,7 @@ Build the primary Hero and 2–3 signature sections using real copy and `tokens.
 ### Phase 4: Full build and editable content layer
 
 Delegate or build every remaining page in `sitemap.md`:
-- For Tier 1 sites, clone and customize `assets/tier1-starter/` (pre-populated Vietnamese HTML + `data/site-data.js` with `data-edit` attributes for instant `file://` preview) and run `node scripts/sync-site-data.mjs <site-dir>` so static HTML, Open Graph metadata, JSON-LD, `llms.txt`, `robots.txt`, and `sitemap.xml` match `data/site-data.js`. Binding conventions: `data-edit` / `data-edit-tel` / `data-edit-href` for single values, `data-edit-list` + `data-edit-item` + `data-edit-field` inside a `<!-- list:KEY -->` … `<!-- /list:KEY -->` region (the first item is the template), `data-edit-template="fixed text {{key}}"` for mixed text, and `data/templates/<file>` models (`{{key}}`, `{{#each key}}`) for derived text files. Never type a phone number, Zalo link, address, opening hours, or domain directly into HTML or text files; bind it, or the sync run fails. Bind the brand name wherever it is visible text or a page title; if it must appear inside an attribute (alt, secondary-page meta), update that place by hand when the brand is renamed. A 2.1 site must first convert `data/site-data.js` to double-quoted JSON, split `scripts/hydrate.js` out, and create the `data/templates/` models before syncing.
+- For Tier 1 sites, clone and customize `assets/tier1-starter/` (pre-populated Vietnamese HTML + `data/site-data.js` with `data-edit` attributes for instant `file://` preview) and run `node scripts/sync-site-data.mjs <site-dir>` so static HTML, Open Graph metadata, JSON-LD, `llms.txt`, `robots.txt`, and `sitemap.xml` match `data/site-data.js`. Binding conventions: `data-edit` / `data-edit-tel` / `data-edit-href` for single values, `data-edit-list` + `data-edit-item` + `data-edit-field` inside a `<!-- list:KEY -->` … `<!-- /list:KEY -->` region (the first item is the template), `data-edit-template="fixed text {{key}}"` for mixed text, and `data/templates/<file>` models (`{{key}}`, `{{#each key}}`) for derived text files. Never type a phone number, Zalo link, address, opening hours, or domain directly into HTML or text files; bind it, or the sync run fails. Bind the brand name wherever it is visible text or a page title; if it must appear inside an attribute (alt, secondary-page meta), update that place by hand when the brand is renamed. A 2.1 site must first convert `data/site-data.js` to double-quoted JSON, split `assets/tier1-starter/scripts/hydrate.js` out, and create the `data/templates/` models before syncing.
 - Attach zero-server customer contact channels (Zalo, click-to-call, static lead form via `tqd-web-launch`), and generate `HUONG-DAN-SUA-WEB.md` from `references/edit-guide-template.md` so the owner knows exactly where to edit words, prices, photos, and phone numbers.
 
 ### Phase 5: Health audit and isolated visual review

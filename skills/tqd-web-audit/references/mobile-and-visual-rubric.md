@@ -6,8 +6,10 @@ Inspect every website across three standard viewports — **375x812** (phone), *
 
 When Node 22+ and a local Chromium-based browser are available, reuse the `render-check.mjs` visual checker from the sibling `tqd-web-design` skill (run from the plugin root or pass its full path) before judging by eye:
 
+Path is relative to the tqd-web-audit skill folder.
+
 ```bash
-node skills/tqd-web-design/scripts/render-check.mjs <index.html|url> --out .audit-shots --viewports 375x812,768x1024,1440x900
+node ../tqd-web-design/scripts/render-check.mjs <index.html|url> --out .audit-shots --viewports 375x812,768x1024,1440x900
 ```
 
 Review both the generated `render-report.json` findings and the full-page PNG screenshots at all three sizes. If no local browser is installed, record clearly that live pixel inspection was skipped rather than assuming a pass.

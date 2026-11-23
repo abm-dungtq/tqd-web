@@ -12,6 +12,9 @@ metadata:
 
 # tqd-web-audit: Website Health, UX & Discovery Auditor
 
+> **Guardrails:** Follow [rules/AGENTS.md](../../rules/AGENTS.md), this plugin's always-on rules, in every reply. Read it once per session if it is not already in context.
+> **Paths:** This skill's folder is `${CLAUDE_SKILL_DIR}` (Claude Code fills this in; on other hosts use the absolute path of the folder that contains this file). Every `scripts/...` and `../<skill>/scripts/...` path below is relative to that folder, not to the website project: run `node "<skill folder>/scripts/<name>" <args>`.
+
 Inspect static HTML folders, local dev servers, or live website URLs across layout, speed, accessibility, content hygiene, and search/AI discoverability, then repair verified defects (`--fix`) or deliver a jargon-free Vietnamese report ordered by customer impact.
 
 ## When to use and boundaries
@@ -32,9 +35,9 @@ Select the checks matching what the user provided so static builds work offline 
 
 | Target | Primary Checks | Discovery & Visual Tools |
 |---|---|---|
-| Static HTML folder or `.html` file | Offline metadata, heading order, `alt`/`src`, placeholders, local broken links | `scripts/audit-html-health.mjs` + `tqd-web-design/scripts/render-check.mjs` (when Chromium is available) |
-| Local dev server (`http://localhost:...`) | Live layout at 3 viewports, console errors, SSR HTML, `robots.txt`, `sitemap.xml`, `llms.txt` | `tqd-web-design/scripts/render-check.mjs` + `scripts/check-discovery-surfaces.mjs <url> --site-origin <prod>` |
-| Live website URL (`https://...`) | Live rendering, mobile usability, CWV risk inspection, full SEO/GEO/AX surface audit | `tqd-web-design/scripts/render-check.mjs` + `scripts/check-discovery-surfaces.mjs <url>` |
+| Static HTML folder or `.html` file | Offline metadata, heading order, `alt`/`src`, placeholders, local broken links | `scripts/audit-html-health.mjs` + `../tqd-web-design/scripts/render-check.mjs` (when Chromium is available) |
+| Local dev server (`http://localhost:...`) | Live layout at 3 viewports, console errors, SSR HTML, `robots.txt`, `sitemap.xml`, `llms.txt` | `../tqd-web-design/scripts/render-check.mjs` + `scripts/check-discovery-surfaces.mjs <url> --site-origin <prod>` |
+| Live website URL (`https://...`) | Live rendering, mobile usability, CWV risk inspection, full SEO/GEO/AX surface audit | `../tqd-web-design/scripts/render-check.mjs` + `scripts/check-discovery-surfaces.mjs <url>` |
 
 ## Audit workflow
 
@@ -59,7 +62,7 @@ node scripts/check-discovery-surfaces.mjs <base-url> [--site-origin <prod-url>] 
 When Node 22+ and a local Chrome, Edge, or Chromium binary exist, capture screenshots and DOM diagnostics across `375x812`, `768x1024`, and `1440x900` by running the sibling `tqd-web-design` visual checker (from the plugin's `skills/` directory):
 
 ```bash
-node skills/tqd-web-design/scripts/render-check.mjs <index.html|url> --out .audit-shots --viewports 375x812,768x1024,1440x900
+node ../tqd-web-design/scripts/render-check.mjs <index.html|url> --out .audit-shots --viewports 375x812,768x1024,1440x900
 ```
 
 Inspect the rendered screenshots and DOM diagnostics against `references/mobile-and-visual-rubric.md`:
@@ -80,11 +83,11 @@ Inspect the rendered screenshots and DOM diagnostics against `references/mobile-
 
 - Apply deterministic technical repairs in the project's existing stack without inventing reviews/metrics or removing real owner copy: add missing `<html lang>`, viewport, unique titles/descriptions, heading order, `img` `alt` and dimensions, `preload`/`fetchpriority="high"`, `font-display: swap`, `defer`, `:focus-visible`, `prefers-reduced-motion`, `robots.txt`, `sitemap.xml`, `llms.txt`, and `404.html`.
 - Ask the owner before filling missing `[Cần bổ sung: ...]` business facts, replacing real copy, or changing AI training-crawler policy (`GPTBot`, `ClaudeBot`, `Google-Extended`).
-- Re-run `scripts/audit-html-health.mjs`, `scripts/check-discovery-surfaces.mjs` (when a URL is running), and `tqd-web-design/scripts/render-check.mjs` (when browser rendering applies) so every fix is backed by fresh passing output.
+- Re-run `scripts/audit-html-health.mjs`, `scripts/check-discovery-surfaces.mjs` (when a URL is running), and `../tqd-web-design/scripts/render-check.mjs` (when browser rendering applies) so every fix is backed by fresh passing output.
 
 ### 5. Coordinate isolated visual sign-off
 
-For release sign-off or after `--fix` repairs, delegate an independent visual review to the `visual-ux-critic` agent via the `delegate_agent capability`, passing the target path or URL, captured `.audit-shots/` PNG paths, and latest script outputs. Fix any blocking visual defect `visual-ux-critic` identifies and re-run the checks.
+For release sign-off or after `--fix` repairs, delegate an independent visual review to the `visual-ux-critic` agent, passing the target path or URL, captured `.audit-shots/` PNG paths, and latest script outputs. Fix any blocking visual defect `visual-ux-critic` identifies and re-run the checks.
 
 ## Plain-Vietnamese report format
 
@@ -113,6 +116,6 @@ Cite observed evidence for every finding (`file:line`, viewport, screenshot path
 
 ## Done when
 
-- All applicable checks (`audit-html-health.mjs`, `check-discovery-surfaces.mjs`, and `tqd-web-design/scripts/render-check.mjs`) have executed or any environment limitation is explicitly noted.
+- All applicable checks (`audit-html-health.mjs`, `check-discovery-surfaces.mjs`, and `../tqd-web-design/scripts/render-check.mjs`) have executed or any environment limitation is explicitly noted.
 - Findings are reported in plain, jargon-free Vietnamese grouped under **Chặn trải nghiệm khách** and **Nên nâng cấp** with concrete evidence.
 - In `--fix` mode, all targeted blockers are repaired, re-verified clean (`exit 0`), and signed off with `visual-ux-critic` when visual rendering applies.
