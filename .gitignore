@@ -7,3 +7,4 @@ coverage/
 tmp/
 render-check/
 .viet-pro/
+evals/.results/
