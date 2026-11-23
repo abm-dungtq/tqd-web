@@ -7,7 +7,7 @@ compatibility: "macOS, Linux, Windows (Node.js >= 20)"
 license: "MIT"
 metadata:
   author: tqd
-  version: "2.1.0"
+  version: "2.2.0"
 ---
 
 # tqd-web: Studio Thiết Kế Website Cho Người Không Chuyên

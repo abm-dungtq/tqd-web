@@ -4,9 +4,11 @@
 
 # TQD Web Studio (`tqd-web`)
 
-**Phiên bản 2.1.0** · MIT · Antigravity IDE · Claude Code · Gemini CLI
+**Phiên bản 2.2.0** · MIT · Antigravity IDE · Claude Code · Gemini CLI
 
 Luật chung nằm ở `rules/AGENTS.md`: Gemini CLI tự nạp, Claude Code nạp qua từng skill, Antigravity chưa kiểm chứng.
+
+Yêu cầu: Node.js từ 20 trở lên. Riêng kiểm tra bằng ảnh chụp màn hình (render-check) cần Node.js từ 22 và Chrome, Edge hoặc Chromium.
 
 Plugin giúp **người không biết lập trình hay thiết kế** tự tạo website đẹp, dễ xem trên điện thoại, chuẩn Google và dễ sửa nội dung về sau. Chỉ cần mô tả cửa hàng hoặc dịch vụ bằng lời hằng ngày, hệ thống tự xử lý từ phối màu, chữ tiếng Việt đến đưa web lên mạng.
 

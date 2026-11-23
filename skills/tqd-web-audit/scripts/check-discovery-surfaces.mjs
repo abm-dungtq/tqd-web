@@ -2,7 +2,7 @@
 // Scan a running site's discovery surfaces for people, search engines and AI agents:
 // robots.txt, sitemap.xml, llms.txt, llms-full.txt, per-URL .md variants, and the
 // head metadata of sampled pages (title, description, canonical, Open Graph, Twitter,
-// JSON-LD, lang, viewport). Standard library only: needs Node >= 18 (global fetch).
+// JSON-LD, lang, viewport). Standard library only: needs Node >= 20 (global fetch).
 //
 // Usage: node check-discovery-surfaces.mjs <base-url> [--site-origin <url>] [--sample 10] [--json]
 //        [--timeout 10000]
