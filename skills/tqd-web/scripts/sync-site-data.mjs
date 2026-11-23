@@ -17,7 +17,7 @@
  * Usage:
  *   node sync-site-data.mjs <site-dir> [--dry-run] [--check] [--help]
  * Exit codes: 0 in sync / help, 1 drift, hard-coded value or data error,
- *             2 usage error or missing file.
+ *             2 usage error or a file that cannot be read or written.
  */
 
 import fs from 'node:fs';
@@ -154,14 +154,14 @@ function replaceMetaContent(html, attrName, attrValue, newContent) {
   if (typeof newContent !== 'string' || !newContent.trim()) return html;
   const escaped = escapeHtmlAttr(newContent);
   const re = new RegExp(
-    `(<meta\\b[^>]*\\b${attrName}\\s*=\\s*["']${escapeRegExp(attrValue)}["'][^>]*\\bcontent\\s*=\\s*)(["'])([^"']*)\\2([^>]*>)`,
+    `(<meta\\b[^>]*\\b${attrName}\\s*=\\s*["']${escapeRegExp(attrValue)}["'][^>]*\\bcontent\\s*=\\s*)(["'])(.*?)\\2([^>]*>)`,
     'i'
   );
   if (re.test(html)) {
     return html.replace(re, (_, prefix, quote, _old, suffix) => `${prefix}${quote}${escaped}${quote}${suffix}`);
   }
   const revRe = new RegExp(
-    `(<meta\\b[^>]*\\bcontent\\s*=\\s*)(["'])([^"']*)\\2([^>]*\\b${attrName}\\s*=\\s*["']${escapeRegExp(attrValue)}["'][^>]*>)`,
+    `(<meta\\b[^>]*\\bcontent\\s*=\\s*)(["'])(.*?)\\2([^>]*\\b${attrName}\\s*=\\s*["']${escapeRegExp(attrValue)}["'][^>]*>)`,
     'i'
   );
   return html.replace(revRe, (_, prefix, quote, _old, suffix) => `${prefix}${quote}${escaped}${quote}${suffix}`);
@@ -238,6 +238,26 @@ function renderInline(template, data, item, label) {
  * Re-render every `<!-- list:KEY -->` … `<!-- /list:KEY -->` region from the array at KEY.
  * The first `data-edit-item` element is the template for all entries.
  */
+function findElementEnd(html, startIndex, tagName) {
+  const tag = escapeRegExp(tagName);
+  const re = new RegExp(`<!--[\\s\\S]*?-->|</${tag}\\s*>|<${tag}(\\s[^>]*)?>`, 'gi');
+  re.lastIndex = startIndex;
+  let depth = 0;
+  for (let m; (m = re.exec(html)); ) {
+    const token = m[0];
+    if (token.startsWith('<!--')) continue;
+    if (token.startsWith('</')) {
+      depth -= 1;
+      if (depth === 0) return re.lastIndex;
+    } else if (/\/\s*$/.test(m[1] ?? '')) {
+      if (depth === 0) return re.lastIndex;
+    } else {
+      depth += 1;
+    }
+  }
+  return -1;
+}
+
 function renderLists(html, data) {
   return html.replace(
     /(<!--\s*list:([\w.]+)\s*-->)([\s\S]*?)(<!--\s*\/list:\2\s*-->)/g,
@@ -246,27 +266,41 @@ function renderLists(html, data) {
       if (!Array.isArray(entries)) return full;
       if (entries.length === 0) throw dataError(`Danh sách "${key}" phải còn ít nhất 1 mục.`);
 
-      const first = /([ \t]*)<([a-zA-Z0-9-]+)\b[^>]*\bdata-edit-item\b[^>]*>/.exec(body);
-      if (!first) return full;
+      const first = /([ \t]*)<([a-zA-Z0-9-]+)\b[^>]*\bdata-edit-item\b[^>]*>/i.exec(body);
+      if (!first) {
+        throw dataError(`Danh sách "${key}" thiếu mục mẫu: mục đầu tiên cần thuộc tính data-edit-item.`);
+      }
       const [, indent, tagName] = first;
-      const closeTag = `</${tagName}>`;
-      const itemEnd = body.indexOf(closeTag, first.index);
-      if (itemEnd === -1) return full;
+      const itemEnd = findElementEnd(body, first.index + indent.length, tagName);
+      if (itemEnd === -1) {
+        throw dataError(`Mục đầu của danh sách "${key}" thiếu thẻ đóng </${tagName}>.`);
+      }
 
-      const itemTemplate = body.slice(first.index + indent.length, itemEnd + closeTag.length);
+      const itemTemplate = body.slice(first.index + indent.length, itemEnd);
       const lead = body.slice(0, first.index);
       const tail = /\s*$/.exec(body)[0];
 
-      const items = entries.map((entry, i) => itemTemplate.replace(
-        /<([a-zA-Z0-9-]+)([^>]*\bdata-edit-field\s*=\s*"([^"]+)"[^>]*)>[^<]*<\/\1>/g,
-        (_, tag, attrs, field) => {
-          const value = entry == null ? undefined : entry[field];
-          if (typeof value !== 'string') {
-            throw dataError(`Mục thứ ${i + 1} của "${key}" thiếu dòng "${field}". Mỗi mục cần đủ các dòng như mục đầu tiên.`);
-          }
-          return `<${tag}${attrs}>${escapeHtmlText(value)}</${tag}>`;
+      const fieldRe = /<([a-zA-Z0-9-]+)([^>]*\bdata-edit-field\s*=\s*(["'])([^"']+)\3[^>]*)>[^<]*<\/\1>/gi;
+      const declared = (itemTemplate.match(/\bdata-edit-field\s*=/g) ?? []).length;
+      let matched = 0;
+      itemTemplate.replace(fieldRe, () => {
+        matched += 1;
+        return '';
+      });
+      if (declared === 0) {
+        throw dataError(`Mục mẫu của danh sách "${key}" thiếu data-edit-field, không có dòng nào để điền.`);
+      }
+      if (matched !== declared) {
+        throw dataError(`Mục mẫu của danh sách "${key}" có data-edit-field bọc thẻ con hoặc không có thẻ bao; mỗi trường phải là một thẻ chứa chữ thuần.`);
+      }
+
+      const items = entries.map((entry, i) => itemTemplate.replace(fieldRe, (_, tag, attrs, _q, field) => {
+        const value = entry == null ? undefined : entry[field];
+        if (typeof value !== 'string') {
+          throw dataError(`Mục thứ ${i + 1} của "${key}" thiếu dòng "${field}". Mỗi mục cần đủ các dòng như mục đầu tiên.`);
         }
-      ));
+        return `<${tag}${attrs}>${escapeHtmlText(value)}</${tag}>`;
+      }));
       return `${open}${lead}${indent}${items.join(`\n${indent}`)}${tail}${close}`;
     }
   );
@@ -323,8 +357,8 @@ export function syncHtmlWithSiteData(html, data, { head = true } = {}) {
 
   // Update inner text of leaf elements with data-edit-template="fixed text {{key}}"
   out = out.replace(
-    /<([a-zA-Z0-9-]+)([^>]*\bdata-edit-template\s*=\s*"([^"]*)"[^>]*)>([^<]*)<\/\1>/gi,
-    (_, tagName, attrs, template) => {
+    /<([a-zA-Z0-9-]+)([^>]*\bdata-edit-template\s*=\s*(["'])([^"']*)\3[^>]*)>([^<]*)<\/\1>/gi,
+    (_, tagName, attrs, _q, template) => {
       const text = renderInline(unescapeHtmlAttr(template), data, null, 'data-edit-template');
       return `<${tagName}${attrs}>${escapeHtmlText(text)}</${tagName}>`;
     }
@@ -456,9 +490,23 @@ function findHardcodedValues(siteDir, data, templates) {
 }
 
 function writeFileAtomic(filePath, content) {
-  const tmpPath = `${filePath}.tqd-tmp`;
-  fs.writeFileSync(tmpPath, content, 'utf8');
-  fs.renameSync(tmpPath, filePath);
+  const suffix = `${process.pid}-${Math.random().toString(36).slice(2, 8)}`;
+  const tmpPath = path.join(path.dirname(filePath), `.${path.basename(filePath)}.${suffix}.tqd-tmp`);
+  const fd = fs.openSync(tmpPath, 'wx');
+  try {
+    fs.writeFileSync(fd, content, 'utf8');
+    fs.closeSync(fd);
+  } catch (err) {
+    try { fs.closeSync(fd); } catch { /* already closed */ }
+    try { fs.unlinkSync(tmpPath); } catch { /* nothing to clean */ }
+    throw err;
+  }
+  try {
+    fs.renameSync(tmpPath, filePath);
+  } catch (err) {
+    try { fs.unlinkSync(tmpPath); } catch { /* nothing to clean */ }
+    throw err;
+  }
 }
 
 export function syncSiteDirectory(siteDir, { dryRun = false } = {}) {
@@ -545,6 +593,6 @@ if (process.argv[1] && invokedDirectly()) {
     }
   } catch (err) {
     console.error(`Error: ${err.message}`);
-    process.exit(err.code === 'ENOENT' ? 2 : 1);
+    process.exit(err.code === 'EDATA' ? 1 : 2);
   }
 }

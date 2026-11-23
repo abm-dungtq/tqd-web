@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { escapeHtmlText, parseSiteData } from '../sync-site-data.mjs';
+import { escapeHtmlText, parseSiteData, syncHtmlWithSiteData } from '../sync-site-data.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const scriptPath = path.join(path.dirname(__dirname), 'sync-site-data.mjs');
@@ -346,4 +346,53 @@ test('contract: renaming the brand to a longer name that contains the old one wo
 test('contract: the shipped starter is in sync', () => {
   const res = run(starterDir, '--check');
   assert.equal(res.status, 0, res.stdout + res.stderr);
+});
+
+test('contract: nested markup inside a list item survives rendering', () => {
+  const html = [
+    '<div class="offerings" data-edit-list="offerings">',
+    '  <!-- list:offerings -->',
+    '  <div class="card" data-edit-item>',
+    '    <h3 data-edit-field="title">Mẫu</h3>',
+    '    <div class="row"><p data-edit-field="summary">Mẫu</p></div>',
+    '  </div>',
+    '  <!-- /list:offerings -->',
+    '</div>',
+  ].join('\n');
+  const out = syncHtmlWithSiteData(html, {
+    offerings: [{ title: 'Bánh mì', summary: 'Giòn' }, { title: 'Bánh ngọt', summary: 'Ít đường' }],
+  });
+  assert.equal(count(out, /data-edit-item/g), 2);
+  assert.equal(count(out, /<div class="row">/g), 2);
+  assert.match(out, /<h3 data-edit-field="title">Bánh mì<\/h3>/);
+  assert.match(out, /<p data-edit-field="summary">Ít đường<\/p>/);
+});
+
+test('contract: a list field wrapped in another element is a data error', () => {
+  const html = [
+    '<!-- list:offerings -->',
+    '<div class="card" data-edit-item><p data-edit-field="title"><span>Mẫu</span></p></div>',
+    '<!-- /list:offerings -->',
+  ].join('\n');
+  assert.throws(
+    () => syncHtmlWithSiteData(html, { offerings: [{ title: 'Bánh mì' }] }),
+    /thẻ con/
+  );
+});
+
+test('contract: meta description containing an apostrophe is replaced, not left stale', () => {
+  const html = '<html><head><meta name="description" content="Mô tả cũ"></head><body></body></html>';
+  const out = syncHtmlWithSiteData(html, { metaDescription: "Bánh của L'an" });
+  assert.match(out, /<meta name="description" content="Bánh của L&#39;an">/);
+  assert.doesNotMatch(out, /Mô tả cũ/);
+});
+
+test('contract: an unreadable data file exits 2, not the drift code 1', () => {
+  withTempStarter((dir) => {
+    const dataPath = path.join(dir, 'data', 'site-data.js');
+    fs.rmSync(dataPath);
+    fs.mkdirSync(dataPath);
+    const res = run(dir);
+    assert.equal(res.status, 2, res.stdout + res.stderr);
+  });
 });

@@ -39,6 +39,8 @@ Không lệnh nào trong 4 kịch bản cho thấy script không tìm thấy ho�
 - Kịch bản 03 không phân biệt được "mới có phần đầu trang" với "đã xong cả trang chủ"; khẳng định chỉ đếm số tệp HTML và số câu hỏi.
 - Kịch bản 01 dùng lời nhắn tự nhiên nên còn đo cả việc skill có tự kích hoạt hay không, không riêng hành vi hỏi từng câu.
 - Kịch bản 02 đạt phần chống bịa nhưng trượt phần đánh dấu `[Cần bổ sung]`; đây là một mẫu, chưa đủ để kết luận tỉ lệ tuân thủ.
+- Các khẳng định là so khớp mẫu chữ trên HTML và câu trả lời cuối, không đọc hiểu ý nghĩa: một câu trả lời chứa từ khóa nhưng phủ định (ví dụ "không cần xác nhận") vẫn có thể khớp; một câu có một dấu hỏi vẫn có thể là hai câu hỏi. PASS là bằng chứng dương tính, không phải bảo đảm đầy đủ.
+- Bộ dò lệnh triển khai nhận diện danh sách lệnh ngắn (`vercel`, `netlify`, `wrangler`, `gh`, `scp`, `rsync`) và tên công cụ chứa `deploy`/`publish`; lệnh `curl` gọi thẳng API triển khai không bị bắt.
 
 ## Việc cần chủ repo quyết
 
