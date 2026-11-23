@@ -6,57 +6,86 @@
 
 **Phiên bản 2.3.0** · MIT · Antigravity IDE · Claude Code · Gemini CLI
 
-Luật chung nằm ở `rules/AGENTS.md`: Gemini CLI tự nạp, Claude Code nạp qua từng skill, Antigravity chưa kiểm chứng.
+Bạn mô tả cửa hàng hay dịch vụ bằng lời thường, AI agent dựng giúp một website tiếng Việt xem tốt trên điện thoại, có sẵn cấu trúc cho Google và để bạn tự sửa chữ, giá, ảnh về sau. Plugin dành cho chủ quán, chủ tiệm, người làm dịch vụ không biết lập trình hay thiết kế. Người làm web cho khách bằng agent cũng dùng được.
 
-Yêu cầu: Node.js từ 20 trở lên. Riêng kiểm tra bằng ảnh chụp màn hình (render-check) cần Node.js từ 22 và Chrome, Edge hoặc Chromium.
+Cần Node.js 20 trở lên. Bước chụp màn hình để kiểm tra giao diện (`render-check`) cần Node.js 22 và Chrome, Edge hoặc Chromium.
 
-Plugin giúp **người không biết lập trình hay thiết kế** tự tạo website đẹp, dễ xem trên điện thoại, chuẩn Google và dễ sửa nội dung về sau. Chỉ cần mô tả cửa hàng hoặc dịch vụ bằng lời hằng ngày, hệ thống tự xử lý từ phối màu, chữ tiếng Việt đến đưa web lên mạng.
-
----
-
-## Điểm khác biệt cho người không chuyên
-
-1. **Không hỏi thuật ngữ kỹ thuật:** Hỏi từng câu một (3 đến 4 câu ngắn) về khách hàng, dịch vụ và mục tiêu chính.
-2. **Duyệt mẫu thật bằng mắt:** Dựng phần đầu trang với màu và chữ thật để bạn xem trước khi làm hết các trang.
-3. **Tự chọn công nghệ nhẹ nhất:**
-   - Web ngắn 1 đến 3 trang dùng HTML tĩnh và `data/site-data.js`, mở xem thẳng trên máy.
-   - Web nhiều trang, blog hoặc danh mục tách riêng phần chữ, giá, ảnh để tự sửa an toàn.
-   - Chỉ mở nhánh Web App (đăng nhập, dữ liệu, thanh toán SePay/VietQR) khi bạn thật sự cần.
-4. **Không bịa số liệu ảo:** Chỗ thiếu ảnh hay con số thật giữ rõ thẻ `[Cần bổ sung: ...]`.
-5. **Kèm cẩm nang tự sửa:** Xuất xưởng cùng tệp `HUONG-DAN-SUA-WEB.md` chỉ rõ nơi đổi SĐT, Zalo, giá và ảnh.
+Nhánh `main` có thêm vài tính năng chưa phát hành, ghi ở mục `[Unreleased]` trong [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## Quy trình vận hành 6 chặng
+## Plugin làm gì cho bạn
+
+1. **Hỏi bằng lời thường.** Agent hỏi từng câu một, khoảng 3 đến 4 câu, về khách hàng, dịch vụ và việc bạn muốn khách làm (gọi, nhắn Zalo, đặt lịch, hỏi giá).
+2. **Cho xem mẫu trước khi làm hết.** Agent dựng phần đầu trang (Hero) bằng màu, chữ và nội dung thật để bạn duyệt. Sai màu hay sai không khí thì sửa ở đây, chưa tốn công làm các trang còn lại.
+3. **Chọn công nghệ nhẹ nhất đủ dùng.**
+   - Web 1 đến 3 trang: HTML tĩnh kèm `data/site-data.js`, mở thẳng bằng trình duyệt, không cần bước build.
+   - Web nhiều trang, blog, danh mục: chữ, giá và ảnh nằm riêng trong `content/` để sửa không đụng vào mã.
+   - Đăng nhập, lưu dữ liệu, thanh toán: chỉ làm khi bạn yêu cầu rõ. Phần này cần người có kinh nghiệm dựng và kiểm thử (xem mục "Mức đã kiểm chứng").
+4. **Không bịa.** Quy tắc chung cấm tự bịa số liệu, đánh giá khách hàng hay ảnh không có thật. Chỗ còn thiếu được đánh dấu `[Cần bổ sung: ...]` để bạn điền.
+5. **Bàn giao cẩm nang sửa web.** Mỗi website đi kèm tệp `HUONG-DAN-SUA-WEB.md` chỉ chỗ đổi số điện thoại, Zalo, giá và ảnh.
+
+---
+
+## Quy trình 6 chặng
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/workflow-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="assets/workflow-light.svg">
-    <img alt="Sơ đồ quy trình vận hành 6 chặng của TQD Web Studio" src="assets/workflow-light.svg" width="100%">
+    <img alt="Sơ đồ quy trình 6 chặng của TQD Web Studio" src="assets/workflow-light.svg" width="100%">
   </picture>
 </p>
 
-Sơ đồ minh họa luồng phối hợp giữa **Chủ website**, bộ điều phối `tqd-web` và dàn kỹ năng qua hai vòng kiểm soát chất lượng: duyệt mẫu Hero bằng mắt ở Chặng 3 và tự khám sửa 3 màn hình ở Chặng 5. Mở [sơ đồ tương tác (`workflow.html`)](docs/diagrams/workflow.html) để xem chi tiết từng bước.
+Chủ website, bộ điều phối `tqd-web` và các kỹ năng con đi qua 6 chặng: hỏi nhu cầu, chốt màu, font và nội dung, duyệt mẫu Hero, dựng toàn bộ, khám lỗi, rồi đưa lên mạng. Có hai chốt chặn chất lượng. Ở chặng 3, bạn duyệt mẫu Hero bằng mắt. Ở chặng 5, agent chụp trang ở 3 kích thước màn hình (điện thoại, máy tính bảng, máy tính) và sửa hết lỗi chặn trước khi bàn giao. Xem từng bước trong [sơ đồ tương tác `workflow.html`](docs/diagrams/workflow.html).
+
+Agent luôn dừng lại hỏi bạn trước khi mua tên miền hay gói trả phí, đổi DNS, đưa lên tên miền chính, bật thanh toán thật hoặc xoá dữ liệu của website đang chạy.
 
 ---
 
-## Hệ thống 6 kỹ năng bên trong Plugin
+## 6 kỹ năng trong plugin
 
-| Lệnh / Kỹ năng | Khi nào dùng | Việc xử lý chính |
+| Kỹ năng | Dùng khi | Việc chính |
 |---|---|---|
-| `tqd-web` | Làm website mới từ đầu hoặc làm lại toàn bộ | Điều phối trọn gói 6 chặng từ hỏi nhu cầu đến khi web chạy trên mạng |
-| `tqd-web-design` | Chọn màu, tạo logo, làm đẹp giao diện | Phối màu 60/30/10, chọn cặp chữ tiếng Việt sắc nét, kiểm tra ảnh chụp 3 màn hình |
-| `tqd-web-content` | Viết chữ bán hàng, nút bấm và bài SEO | Tích hợp `viet-pro` viết nội dung và blog tự nhiên, chống sáo ngữ AI, chuẩn Google/AI |
-| `tqd-web-audit` | Khám lỗi trang web đang có | Kiểm tra tràn chữ trên điện thoại, tốc độ tải, link gãy, JSON-LD và sửa lỗi trực tiếp |
-| `tqd-web-launch` | Gắn nút Zalo, form nhận khách và đưa lên mạng | Kết nối form không tốn phí máy chủ, xuất bản miễn phí, gắn tên miền và đo lượt xem |
-| `tqd-web-app` | Cần đăng nhập, cơ sở dữ liệu hoặc thanh toán | Nhánh tùy chọn kết nối tài khoản, dữ liệu serverless và SePay/VietQR/Stripe |
+| `tqd-web` | Làm web mới hoặc làm lại toàn bộ | Điều phối 6 chặng, từ hỏi nhu cầu đến bàn giao |
+| `tqd-web-design` | Chọn màu, chữ, logo, làm đẹp giao diện | Gợi ý hướng thiết kế từ bộ dữ liệu offline, phối màu 60/30/10, cặp font có đủ dấu tiếng Việt, chụp kiểm tra 3 màn hình |
+| `tqd-web-content` | Viết chữ trên trang, nút bấm, bài blog SEO | Viết tiếng Việt tự nhiên theo chuẩn `viet-pro`, kèm sitemap, `robots.txt`, `llms.txt` và JSON-LD |
+| `tqd-web-audit` | Khám một web đang có | Tìm tràn chữ trên điện thoại, rủi ro tốc độ, lỗi trợ năng, link gãy, chữ giữ chỗ còn sót; báo lỗi theo mức ảnh hưởng tới khách và sửa khi bạn cho phép |
+| `tqd-web-launch` | Gắn form, đưa web lên mạng | Form và nút liên hệ không cần máy chủ (Zalo, gọi điện, Web3Forms, Formspree, Google Sheets), triển khai lên Cloudflare Pages, Vercel hoặc Netlify, hướng dẫn trỏ tên miền, gắn công cụ đo lượt xem |
+| `tqd-web-app` | Cần đăng nhập, dữ liệu hoặc thanh toán | Nhánh tuỳ chọn: tài khoản, cơ sở dữ liệu, thanh toán SePay/VietQR, Polar, Stripe |
 
 ---
 
-## Bắt đầu nhanh bằng 3 câu gợi ý
+## Mức đã kiểm chứng
 
-Sau khi bật plugin, bạn có thể nhắn thẳng một trong các yêu cầu sau:
+| Phần | Tình trạng |
+|---|---|
+| Web 1 đến 3 trang (HTML tĩnh) | Có bộ khung mẫu và script đồng bộ nội dung, có test tự động |
+| Web nhiều trang (Astro, Next.js) | Có hướng dẫn, chưa có bộ khung mẫu dựng sẵn |
+| Đăng nhập, cơ sở dữ liệu | Chưa kiểm chứng. Cần lập trình viên có kinh nghiệm dựng và kiểm thử trên nền tảng đã chọn (môi trường thử, kiểm tra bảo mật) |
+| Xác thực webhook SePay, Polar | Có script và test chạy offline, chưa gọi môi trường thử thật |
+| Stripe | Chỉ có tài liệu hướng dẫn, chưa có script xác thực đi kèm |
+| Triển khai, trỏ DNS | Theo checklist và chờ bạn duyệt trước khi đổi DNS; plugin không tự đổi DNS |
+
+---
+
+## Gợi ý thiết kế offline
+
+Trước khi đề xuất màu và font, agent tra một bộ dữ liệu nhỏ đi kèm plugin thay vì tự nghĩ ra:
+
+```bash
+node skills/tqd-web-design/scripts/design-intel.mjs "quán cà phê ấm cúng" --surface landing
+```
+
+Lệnh trả về vài hướng thiết kế, bảng màu đã kiểm tra độ tương phản, cặp font hiển thị đủ dấu tiếng Việt và các quy tắc trải nghiệm. Không cần mạng, Python hay npm. Nếu câu mô tả không khớp từ khoá nào, lệnh nói rõ là không khớp thay vì tự chọn bừa một hướng.
+
+Trên `main` (chưa phát hành), bạn có thể chỉ cần thêm `--refs <thư mục>` tới một thư mục DESIGN.md của riêng mình, ví dụ bản tải từ Refero Styles. Thư mục đó phải nằm ngoài repo; plugin không kèm, không chép lại nội dung của bên thứ ba. Quyền dùng và cách chuyển thành thiết kế riêng nằm trong [external-design-md.md](skills/tqd-web-design/references/external-design-md.md).
+
+---
+
+## Bắt đầu nhanh
+
+Sau khi bật plugin, nhắn cho agent một câu như:
 
 - *"Làm cho mình trang web giới thiệu cửa hàng, có bảng giá đẹp và nút nhắn Zalo đặt hàng"*
 - *"Thiết kế lại giao diện website hiện tại cho gọn, dễ xem trên điện thoại và chuẩn Google"*
@@ -64,26 +93,33 @@ Sau khi bật plugin, bạn có thể nhắn thẳng một trong các yêu cầu
 
 ---
 
-## Cài đặt Plugin đa nền tảng
+## Cài đặt
 
-### 1. Antigravity IDE
-Sao chép hoặc liên kết thư mục kho này vào `~/.gemini/config/plugins/tqd-web`, sau đó mở trang Tùy chỉnh (Customizations) để kiểm tra **TQD Web Studio** đã bật.
+### Claude Code
 
-### 2. Claude Code
 ```bash
 /plugin marketplace add abm-dungtq/tqd-web
 /plugin install tqd-web@tqd-studio
 ```
 
-### 3. Gemini CLI
-Cài đặt trực tiếp từ GitHub hoặc thư mục kho có tệp `gemini-extension.json`:
+### Gemini CLI
+
+Cài thẳng từ GitHub (kho có sẵn `gemini-extension.json`):
+
 ```bash
 gemini extensions install https://github.com/abm-dungtq/tqd-web
 ```
 
+### Antigravity IDE
+
+Sao chép hoặc liên kết thư mục kho vào `~/.gemini/config/plugins/tqd-web`, rồi mở trang Customizations để bật **TQD Web Studio**.
+
+Luật chung của plugin nằm ở `rules/AGENTS.md`. Gemini CLI nạp tệp này qua `contextFileName` trong `gemini-extension.json`, Claude Code nạp qua từng skill; Antigravity chưa được kiểm chứng.
+
 ---
 
-## Tài liệu kiểm toán & Giấy phép
+## Tài liệu và giấy phép
 
-- Xem quá trình phản biện và tái cấu trúc từ 19 skill cũ lên bản 2.1 tại [docs/audit-report.md](docs/audit-report.md).
-- Phân phối theo giấy phép **MIT** ([LICENSE.txt](LICENSE.txt) và [NOTICE.txt](NOTICE.txt)).
+- Lịch sử thay đổi: [CHANGELOG.md](CHANGELOG.md).
+- Quá trình rà soát và gộp 19 skill cũ thành 6 skill: [docs/audit-report.md](docs/audit-report.md).
+- Giấy phép **MIT** và ghi công bên thứ ba: [LICENSE.txt](LICENSE.txt), [NOTICE.txt](NOTICE.txt).
