@@ -37,8 +37,10 @@ Translate plain-language business vibes ("ấm áp thủ công", "chuyên nghi�
 Before proposing visual directions, pull a short list from the curated dataset instead of inventing a palette or font pair from memory:
 
 ```bash
-node "${CLAUDE_SKILL_DIR}/scripts/design-intel.mjs" "<ngành + mood>" --surface <landing|menu|booking|dashboard|auth|settings>
+node "${CLAUDE_SKILL_DIR}/scripts/design-intel.mjs" "<ngành + mood>" --surface landing
 ```
+
+Surfaces: `landing` (default), `menu`, `booking`, `dashboard`, `auth`, `settings`.
 
 - The script reads `data/*.json` only: 14 style directions, 21 contrast-checked palettes, 10 Vietnamese-safe font pairs, 29 UX rules, and 6 surface maps. No network, Python, or npm dependency.
 - Use it as a shortlist, not a decision: confirm one direction in plain language with the owner, then write `docs/website/brand.md` and `tokens.css` as usual.
