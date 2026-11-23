@@ -7,13 +7,13 @@
  */
 window.SITE_DATA = {
   "brandName": "Tiệm Bánh An Lành",
-  "siteUrl": "https://tiembanh-anlanh.vn",
+  "siteUrl": "https://tiembanh-anlanh.example",
   "ogImage": "images/hero-bakery.svg",
   "metaTitle": "Tiệm Bánh An Lành | Bánh mì men tự nhiên nướng mới mỗi sáng",
   "metaDescription": "Bánh mì sourdough lên men 18 giờ và bánh ngọt ít ngọt nướng mới lúc 6h30 mỗi ngày tại Hải Châu, Đà Nẵng. Đặt bánh nhanh qua Zalo hoặc gọi trực tiếp.",
-  "phoneDisplay": "0905 842 619",
-  "phoneTel": "0905842619",
-  "zaloUrl": "https://zalo.me/0905842619",
+  "phoneDisplay": "0900 000 000",
+  "phoneTel": "0900000000",
+  "zaloUrl": "https://zalo.me/0900000000",
   "address": "42 Nguyễn Văn Linh, Hải Châu, Đà Nẵng",
   "hours": "07:00 - 21:00 mỗi ngày",
   "hero": {

@@ -10,4 +10,4 @@ Allow: /
 User-agent: PerplexityBot
 Allow: /
 
-Sitemap: https://tiembanh-anlanh.vn/sitemap.xml
+Sitemap: https://tiembanh-anlanh.example/sitemap.xml

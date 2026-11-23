@@ -10,6 +10,7 @@ Dùng ở Pha 6 cùng `tqd-web-launch`. Ghi nhận trạng thái từng mục l�
 ## 2. Trang & Nội dung thật
 - Mọi trang trong `docs/website/sitemap.md` mở được (mã 200), không gãy nút bấm hoặc liên kết nội bộ.
 - Đã kiểm tra sạch chữ mẫu (`lorem ipsum`, `TODO`) và rà soát toàn bộ thẻ `[Cần bổ sung: ...]`.
+- Không còn nội dung mẫu của khung starter (tên tiệm, địa chỉ, số điện thoại, tên miền mẫu); đã chạy kiểm tra đồng bộ dữ liệu.
 - Trang báo lỗi `404.html` hiển thị thân thiện kèm nút quay về Trang chủ.
 - Có đầy đủ thông tin chân trang tối thiểu (liên hệ, chính sách bảo mật / điều khoản nếu có thu thập thông tin khách).
 

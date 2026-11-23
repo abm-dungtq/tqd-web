@@ -180,6 +180,8 @@ function normalizeText(value) {
 }
 
 const DUMMY_PHONE_RE = /^(?:0?9x+|0?90{7,9}|0?123456789|0?912345678|0?901234567|1234567890|0{7,}|9{7,}|.*xxx.*)$/i;
+const STARTER_FINGERPRINT_RE = /Tiệm Bánh An Lành|42 Nguyễn Văn Linh|tiembanh-anlanh|0900[ .]?000[ .]?000/u;
+const RESERVED_DOMAIN_RE = /\b[a-z0-9-]+\.(?:example|test|invalid)(?![a-z0-9-]|\.[a-z0-9])/i;
 
 function checkContactLink(rawHref, line, add) {
   if (/^tel:/i.test(rawHref)) {
@@ -247,6 +249,18 @@ function scanPlaceholders(text, line, strictPlaceholders, findings, fileLabel, s
         : 'unfinished owner placeholder "[Cần bổ sung..." (run with --strict-placeholders before launch)',
     },
   ];
+  const demoChecks = [
+    {
+      re: STARTER_FINGERPRINT_RE,
+      check: 'starter-default',
+      msg: (match) => `Starter demo content is still present: "${match}". Replace it with the owner's real details.`,
+    },
+    {
+      re: RESERVED_DOMAIN_RE,
+      check: 'reserved-domain',
+      msg: (match) => `Reserved demo domain "${match}" is still present. Use the owner's real domain.`,
+    },
+  ];
   for (const item of checks) {
     if (item.re.test(nfc)) {
       const key = `${item.check}:${line}:${item.msg}`;
@@ -255,6 +269,15 @@ function scanPlaceholders(text, line, strictPlaceholders, findings, fileLabel, s
         findings.push({ severity: item.sev, check: item.check, file: fileLabel, line, message: item.msg });
       }
     }
+  }
+  for (const item of demoChecks) {
+    const match = item.re.exec(nfc);
+    if (!match) continue;
+    const message = item.msg(match[0]);
+    const key = `${item.check}:${line}:${message}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    findings.push({ severity: 'error', check: item.check, file: fileLabel, line, message });
   }
 }
 
@@ -314,6 +337,7 @@ export function analyzeHtml(html, fileLabel = 'index.html', options = {}) {
       if (tok.tag === 'svg' && svgDepth > 0) svgDepth--;
       else if (tok.tag === 'template' && templateDepth > 0) templateDepth--;
       else if (tok.tag === 'title' && inTitle) {
+        scanPlaceholders(titleBuf, titleLine, strictPlaceholders, findings, fileLabel, seenPlaceholders);
         titles.push({ text: normalizeText(titleBuf), line: titleLine });
         inTitle = false;
         titleBuf = '';

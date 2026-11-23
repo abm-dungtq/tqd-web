@@ -10,7 +10,7 @@ Bánh mì men tự nhiên nướng mới mỗi sáng lúc 6h30. Ủ bột lạnh
 
 ## Liên hệ đặt bánh
 
-- Zalo: https://zalo.me/0905842619
-- Điện thoại: 0905 842 619
+- Zalo: https://zalo.me/0900000000
+- Điện thoại: 0900 000 000
 - Địa chỉ: 42 Nguyễn Văn Linh, Hải Châu, Đà Nẵng
 - Giờ mở cửa: 07:00 - 21:00 mỗi ngày

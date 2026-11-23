@@ -56,6 +56,12 @@ Load `references/zero-server-lead-capture.md` when wiring contact buttons or for
 
 ### 2. Run Pre-Launch Safety Checks
 
+For Tier 1 sites with `data/site-data.js`, check that the pages still match the owner's data before anything else. Exit `1` means the site drifted: run the same command without `--check`, then check again.
+
+```bash
+node ../tqd-web/scripts/sync-site-data.mjs <site-dir> --check
+```
+
 Run the bundled Node.js (>= 20, macOS/Linux/Windows) preflight script against the publish folder (`dist`, `out`, or static root) before uploading:
 
 ```bash
@@ -66,8 +72,10 @@ node scripts/preflight-launch-check.mjs <publish-dir> --json
 |---|---|
 | `--json` / `--allow-placeholders` / `--help` | Machine JSON output / downgrade placeholder blockers to warnings / usage help |
 | Exit `0` | Ready to deploy (zero blockers; review any `404.html`, `robots.txt`, or `sitemap.xml` warnings) |
-| Exit `1` | Blocker found: missing/empty `index.html`, exposed `.env`/`.git`/keys, or leftover `TODO`/`FIXME`/`lorem ipsum`/`[Cần bổ sung` |
+| Exit `1` | Blocker found: missing/empty `index.html`, exposed `.env`/`.git`/keys, leftover `TODO`/`FIXME`/`lorem ipsum`/`[Cần bổ sung`, starter demo content, or a reserved `.example`/`.test`/`.invalid` domain |
 | Exit `2` | Usage error or unreadable target folder |
+
+Preflight blocks starter demo content (the starter brand, address, and sample phone number) and reserved demo domains, in HTML as well as in `robots.txt`, `sitemap.xml`, `llms*.txt`, and `*.html.md`.
 
 Resolve every exit-`1` blocker before deploying; pass `--allow-placeholders` only for early staging previews requested by the owner.
 
@@ -109,6 +117,7 @@ Create or update two owner-friendly Vietnamese files in the target website proje
 ## Done When
 
 - `scripts/preflight-launch-check.mjs` exits `0` on the final publish directory (or remaining warnings are documented in `docs/website/launch-report.md`).
+- `sync-site-data.mjs --check` exits `0` for a Tier 1 site with `data/site-data.js`.
 - Contact channels (`tel:`, `zalo.me`, `m.me`, or static form) are wired to real owner targets and verified with a test click or submission.
 - Live deployment URL responds with HTTP `200`, valid HTTPS, and verified DNS/canonical redirect (or preview-only status is clearly noted if domain DNS is awaiting owner action).
 - Analytics and Search Console status are verified or recorded as pending owner approval.

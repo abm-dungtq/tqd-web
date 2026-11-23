@@ -8,6 +8,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { applyRealValues } from './helpers/real-site.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.dirname(__dirname);
@@ -151,21 +152,22 @@ test('E2E pipeline builds a Tier 1 Vietnamese site and passes all 4 studio verif
   assert.match(cssOut, /--space-8: 64px;/);
   assert.match(cssOut, /--container: 1200px;/);
 
-  // 2. tqd-web: Owner edits data/site-data.js and syncs to static HTML + JSON-LD + llms.txt
-  const siteDataPath = path.join(siteDir, 'data', 'site-data.js');
-  let siteDataSrc = fs.readFileSync(siteDataPath, 'utf8');
-  siteDataSrc = siteDataSrc
-    .replace('Tiệm Bánh An Lành', 'Tiệm Bánh Mây Trắng')
-    .replace('Tiệm Bánh An Lành | Bánh mì men tự nhiên nướng mới mỗi sáng', 'Tiệm Bánh Mây Trắng | Bánh mì men tự nhiên nướng mới mỗi sáng')
-    .replace('0905 842 619', '0935 771 208')
-    .replace(/0905842619/g, '0935771208');
-  fs.writeFileSync(siteDataPath, siteDataSrc, 'utf8');
-
-  const syncRes = runNode(syncSiteScript, [siteDir], workDir);
-  assert.equal(syncRes.status, 0, syncRes.stderr + syncRes.stdout);
+  // 2. tqd-web: Owner replaces the starter's demo identity, then the sync rebuilds every root file
+  applyRealValues(siteDir);
   const updatedHtml = fs.readFileSync(path.join(siteDir, 'index.html'), 'utf8');
   assert.match(updatedHtml, /<title>Tiệm Bánh Mây Trắng \|/);
   assert.match(updatedHtml, /href="https:\/\/zalo\.me\/0935771208"/);
+
+  const syncCheckRes = runNode(syncSiteScript, [siteDir, '--check'], workDir);
+  assert.equal(syncCheckRes.status, 0, syncCheckRes.stdout + syncCheckRes.stderr);
+  for (const name of fs.readdirSync(siteDir)) {
+    if (!/\.(?:html|txt|xml|md)$/.test(name)) continue;
+    assert.doesNotMatch(
+      fs.readFileSync(path.join(siteDir, name), 'utf8'),
+      /tiembanh-anlanh|An Lành|0900 ?000 ?000/,
+      `${name} still contains starter demo content`
+    );
+  }
 
   // 3. tqd-web-content: Generate + validate LocalBusiness JSON-LD and sitemap.xml
   const schemaInputPath = path.join(metaDir, 'business.json');
@@ -175,11 +177,11 @@ test('E2E pipeline builds a Tier 1 Vietnamese site and passes all 4 studio verif
     JSON.stringify({
       name: 'Tiệm Bánh Mây Trắng',
       telephone: '0935771208',
-      streetAddress: '42 Nguyễn Văn Linh, Hải Châu',
+      streetAddress: '15 Lê Duẩn, Hải Châu',
       city: 'Đà Nẵng',
       country: 'VN',
-      url: 'https://tiembanh-anlanh.vn',
-      image: 'https://tiembanh-anlanh.vn/images/hero-bakery.svg',
+      url: 'https://banhmaytrang.vn',
+      image: 'https://banhmaytrang.vn/images/hero-bakery.svg',
     }),
     'utf8'
   );
@@ -201,7 +203,7 @@ test('E2E pipeline builds a Tier 1 Vietnamese site and passes all 4 studio verif
   );
   const sitemapRes = runNode(
     generateSitemapScript,
-    ['https://tiembanh-anlanh.vn', path.join(siteDir, 'sitemap.xml'), '--pages', pagesJsonPath],
+    ['https://banhmaytrang.vn', path.join(siteDir, 'sitemap.xml'), '--pages', pagesJsonPath],
     workDir
   );
   assert.equal(sitemapRes.status, 0, sitemapRes.stderr);
@@ -226,7 +228,7 @@ test('E2E pipeline builds a Tier 1 Vietnamese site and passes all 4 studio verif
   try {
     const discoveryRes = await runNodeAsync(
       checkDiscoveryScript,
-      [baseUrl, '--site-origin', 'https://tiembanh-anlanh.vn', '--json'],
+      [baseUrl, '--site-origin', 'https://banhmaytrang.vn', '--json'],
       workDir
     );
     assert.equal(discoveryRes.status, 0, discoveryRes.stdout + discoveryRes.stderr);

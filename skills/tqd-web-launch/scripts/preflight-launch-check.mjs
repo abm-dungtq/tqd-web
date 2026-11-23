@@ -19,7 +19,7 @@ Inspect a website publish folder (such as dist, out, or static root) before uplo
 
 Options:
   --json                Print structured JSON report to stdout
-  --allow-placeholders  Downgrade TODO/FIXME/lorem ipsum/[Cần bổ sung matches to warnings
+  --allow-placeholders  Downgrade TODO/FIXME/lorem ipsum/[Cần bổ sung/starter demo content/reserved demo domains to warnings
   -h, --help            Show this help message and exit
 
 Exit codes:
@@ -48,11 +48,16 @@ const SENSITIVE_FILENAMES = new Set([
 ]);
 
 const PLACEHOLDER_RULES = [
+  { label: 'reserved demo domain', pattern: /\b[a-z0-9-]+\.(?:example|test|invalid)(?![a-z0-9-]|\.[a-z0-9])/i },
+  { label: 'starter demo content', pattern: /Tiệm Bánh An Lành|42 Nguyễn Văn Linh|tiembanh-anlanh|0900[ .]?000[ .]?000/u },
   { label: 'TODO', pattern: /\bTODO\b/ },
   { label: 'FIXME', pattern: /\bFIXME\b/ },
   { label: 'lorem ipsum', pattern: /\blorem\s+ipsum\b/i },
   { label: '[Cần bổ sung', pattern: /\[\s*cần\s+bổ\s+sung\b/iu },
 ];
+
+const DEMO_RULE_LABELS = new Set(['reserved demo domain', 'starter demo content']);
+const DEMO_TEXT_FILES = ['robots.txt', 'sitemap.xml', 'llms.txt', 'llms-full.txt'];
 
 function parseArgs(argv) {
   let json = false;
@@ -195,14 +200,14 @@ function scanTree(rootDir) {
   return { htmlFiles, secretFindings, treeWarnings };
 }
 
-function scanPlaceholders(htmlFiles) {
+function scanPlaceholders(files, rules = PLACEHOLDER_RULES) {
   const matches = [];
-  for (const { fullPath, relPath } of htmlFiles) {
+  for (const { fullPath, relPath } of files) {
     const content = fs.readFileSync(fullPath, 'utf8');
     const lines = content.split(/\r?\n/);
     for (let index = 0; index < lines.length; index += 1) {
       const lineText = lines[index];
-      for (const rule of PLACEHOLDER_RULES) {
+      for (const rule of rules) {
         if (rule.pattern.test(lineText)) {
           matches.push({
             file: relPath,
@@ -216,6 +221,26 @@ function scanPlaceholders(htmlFiles) {
     }
   }
   return matches;
+}
+
+/** Root text files (plus any *.html.md twin): scanned only for demo traces, never for TODO markers. */
+function demoTextFiles(targetDir) {
+  const names = new Set(DEMO_TEXT_FILES);
+  let entries;
+  try {
+    entries = fs.readdirSync(targetDir, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  for (const entry of entries) {
+    if (entry.isFile() && entry.name.endsWith('.html.md')) names.add(entry.name);
+  }
+  const files = [];
+  for (const name of names) {
+    const file = readRegularFile(path.join(targetDir, name));
+    if (file.exists && file.nonEmpty) files.push({ fullPath: path.join(targetDir, name), relPath: name });
+  }
+  return files;
 }
 
 function robotsBlocksAllCrawlers(content) {
@@ -320,7 +345,11 @@ function runChecks(targetDir, { allowPlaceholders }) {
     }
   }
 
-  const placeholderMatches = scanPlaceholders(htmlFiles);
+  const demoRules = PLACEHOLDER_RULES.filter((rule) => DEMO_RULE_LABELS.has(rule.label));
+  const placeholderMatches = [
+    ...scanPlaceholders(htmlFiles),
+    ...scanPlaceholders(demoTextFiles(targetDir), demoRules),
+  ];
   if (placeholderMatches.length > 0) {
     checks.placeholders = allowPlaceholders ? 'warn' : 'fail';
     const targetList = allowPlaceholders ? warnings : blockers;
