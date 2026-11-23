@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "project": "nextlevelbuilder/ui-ux-pro-max-skill",
+    "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+    "commit": "281e4537afb11333ac9947783779aaf314ebfbf2",
+    "license": "MIT",
+    "upstreamFile": "src/ui-ux-pro-max/data/styles.csv",
+    "note": "Tập con đã chọn và viết lại cho website nhỏ; không chép nguyên văn."
+  },
+  "styles": [
+    {
+      "id": "swiss-minimal",
+      "label": "Tối giản Thụy Sĩ",
+      "keywords": ["tối giản", "trắng", "lưới", "rõ ràng", "doanh nghiệp", "sạch sẽ", "kỹ thuật", "minimal", "swiss"],
+      "mood": "Trật tự, rõ ràng, ít trang trí",
+      "bestFor": ["b2b", "tư vấn", "luật", "y tế", "portfolio", "dịch vụ chuyên môn"],
+      "surfaces": ["landing", "dashboard", "auth", "settings"],
+      "avoid": "Không hợp với thương hiệu cần cảm xúc mạnh hoặc ảnh sản phẩm dày đặc",
+      "perf": "Nhanh, không hiệu ứng nặng",
+      "a11y": "Tương phản cao, dễ đọc trên mobile"
+    },
+    {
+      "id": "editorial-warm",
+      "label": "Biên tập ấm",
+      "keywords": ["biên tập", "chữ lớn", "ấm", "thủ công", "kể chuyện", "editorial", "serif", "nội thất"],
+      "mood": "Như một tạp chí giấy, chữ dẫn dắt, ảnh thở",
+      "bestFor": ["tiệm bánh", "cà phê", "nội thất", "studio", "thời trang", "nhà hàng"],
+      "surfaces": ["landing", "menu", "booking"],
+      "avoid": "Không dùng chữ quá nhỏ hoặc khối nội dung dài không có nhịp nghỉ",
+      "perf": "Nhẹ nếu chỉ dùng 1–2 font và ảnh tối ưu",
+      "a11y": "Giữ leading 1.18–1.28 cho dấu tiếng Việt"
+    },
+    {
+      "id": "organic-craft",
+      "label": "Mộc thủ công",
+      "keywords": ["mộc", "thủ công", "đất", "giấy", "mây tre", "tự nhiên", "organic", "craft", "nông sản"],
+      "mood": "Gần gũi, vật liệu thật, bố cục không hoàn hảo có chủ ý",
+      "bestFor": ["gốm", "trà", "mỹ phẩm thiên nhiên", "nông trại", "đồ thủ công", "hoa"],
+      "surfaces": ["landing", "menu", "booking"],
+      "avoid": "Không dùng gradient bóng bẩy hoặc icon emoji thay hình thật",
+      "perf": "Trung bình; ảnh thật cần nén và kích thước hợp lý",
+      "a11y": "Màu đất/gỗ cần đủ tương phản với chữ"
+    },
+    {
+      "id": "luxury-serif",
+      "label": "Sang trọng cổ điển",
+      "keywords": ["sang", "cao cấp", "serif", "đen", "vàng", "luxury", "premium", "trang sức", "spa"],
+      "mood": "Tĩnh, ít chữ, nhiều khoảng thở, chi tiết nhỏ",
+      "bestFor": ["spa cao cấp", "trang sức", "nhà hàng", "khách sạn", "kiến trúc"],
+      "surfaces": ["landing", "booking", "menu"],
+      "avoid": "Không dùng vàng kim loại cho mọi thứ và không làm chữ quá mỏng",
+      "perf": "Nhanh nếu không dùng video nền",
+      "a11y": "Chữ mỏng trên nền sáng dễ trượt tương phản; kiểm 4.5:1"
+    },
+    {
+      "id": "modern-shop",
+      "label": "Bán hàng hiện đại",
+      "keywords": ["bán hàng", "tươi", "nhanh", "thẻ sản phẩm", "thương mại điện tử", "shop", "retail", "modern"],
+      "mood": "Gọn, hiện đại, thẻ sản phẩm dễ quét",
+      "bestFor": ["shop", "thời trang", "phụ kiện", "mỹ phẩm", "đồ gia dụng"],
+      "surfaces": ["landing", "menu"],
+      "avoid": "Không làm mọi thẻ giống hệt nhau và không ẩn CTA trong ảnh",
+      "perf": "Cần tối ưu ảnh sản phẩm và lazy-load",
+      "a11y": "Nút mời trên thẻ phải có nhãn, không chỉ icon"
+    },
+    {
+      "id": "flat-product",
+      "label": "Sản phẩm phẳng",
+      "keywords": ["phẳng", "rõ", "màu", "icon", "flat", "saas", "app", "giáo dục"],
+      "mood": "Mạch lạc, từng khối chức năng rõ ràng",
+      "bestFor": ["saas", "app", "giáo dục", "khóa học", "công cụ"],
+      "surfaces": ["landing", "dashboard", "auth", "settings"],
+      "avoid": "Không dùng bóng đổ sâu giả tạo hoặc viền dày đặc",
+      "perf": "Nhanh, ít ảnh",
+      "a11y": "Kiểm trạng thái hover/focus rõ ràng"
+    },
+    {
+      "id": "soft-service",
+      "label": "Mềm dịch vụ",
+      "keywords": ["mềm", "bo tròn", "dịu", "sức khỏe", "dịch vụ", "soft", "wellness", "đặt lịch"],
+      "mood": "Nhẹ nhàng, an toàn, thân thiện",
+      "bestFor": ["wellness", "đặt lịch", "phòng khám", "tư vấn", "chăm sóc"],
+      "surfaces": ["landing", "booking", "auth", "settings"],
+      "avoid": "Không bo tròn mọi thành phần và không làm mờ trọng tâm",
+      "perf": "Nhanh; bóng đổ nhẹ không ảnh hưởng paint",
+      "a11y": "Viền mờ dễ mất thấy trên màn hình sáng ngoài trời"
+    },
+    {
+      "id": "bold-energy",
+      "label": "Đậm năng lượng",
+      "keywords": ["đậm", "khối", "tương phản", "năng lượng", "bold", "gym", "sự kiện", "streetwear"],
+      "mood": "Mạnh, dứt khoát, chữ to",
+      "bestFor": ["gym", "sự kiện", "streetwear", "âm nhạc", "thể thao"],
+      "surfaces": ["landing", "menu"],
+      "avoid": "Không dùng cho luật, y tế hoặc nội dung cần sự tin cậy trầm tính",
+      "perf": "Trung bình; tránh video tự chạy",
+      "a11y": "Chữ to vẫn phải giữ tương phản và không cắt dấu tiếng Việt"
+    },
+    {
+      "id": "data-dense",
+      "label": "Bảng điều khiển dày dữ liệu",
+      "keywords": ["dashboard", "bảng", "số liệu", "mật độ", "báo cáo", "admin", "vận hành", "data"],
+      "mood": "Ưu tiên đọc nhanh, so sánh và hành động",
+      "bestFor": ["admin", "tài chính", "vận hành", "quản trị", "báo cáo"],
+      "surfaces": ["dashboard", "settings", "auth"],
+      "avoid": "Không dùng cho trang chủ marketing hoặc câu chuyện thương hiệu",
+      "perf": "Cần phân trang và tránh render lại toàn bảng",
+      "a11y": "Bảng phải có header, caption và không chỉ dùng màu để phân biệt"
+    },
+    {
+      "id": "dark-console",
+      "label": "Bảng điều khiển tối",
+      "keywords": ["tối", "terminal", "giám sát", "công cụ", "dark", "console", "developer"],
+      "mood": "Tập trung, kỹ thuật, màn hình tối",
+      "bestFor": ["công cụ dev", "giám sát", "devops", "nội bộ"],
+      "surfaces": ["dashboard", "settings", "auth"],
+      "avoid": "Không dùng cho spa, bánh, thương hiệu ấm áp hoặc đọc dài",
+      "perf": "Nhanh; tránh hiệu ứng phát sáng",
+      "a11y": "Chữ xám trên nền tối rất dễ trượt 4.5:1"
+    },
+    {
+      "id": "mono-typographic",
+      "label": "Đơn sắc chữ dẫn dắt",
+      "keywords": ["đen trắng", "chữ", "tối giản", "danh mục", "monochrome", "portfolio", "kiến trúc", "nhiếp ảnh"],
+      "mood": "Yên, chữ là nhân vật chính, ít màu",
+      "bestFor": ["portfolio", "kiến trúc", "nhiếp ảnh", "studio", "luật"],
+      "surfaces": ["landing", "menu"],
+      "avoid": "Không dùng khi cần phân loại nhiều danh mục bằng màu",
+      "perf": "Rất nhanh",
+      "a11y": "Phân cấp bằng cỡ chữ và khoảng trắng, không chỉ màu xám"
+    },
+    {
+      "id": "retro-print",
+      "label": "In ấn hoài niệm",
+      "keywords": ["cổ điển", "in", "giấy", "hoài niệm", "retro", "vintage", "tiệm sách", "cà phê"],
+      "mood": "Như ấn phẩm cũ, màu trầm, chi tiết in",
+      "bestFor": ["cà phê", "tiệm sách", "thời trang vintage", "bia thủ công", "sự kiện"],
+      "surfaces": ["landing", "menu"],
+      "avoid": "Không dùng texture nặng hoặc chữ trang trí khó đọc",
+      "perf": "Nhanh nếu texture nhẹ",
+      "a11y": "Texture nền phải rất nhẹ để không phá tương phản"
+    },
+    {
+      "id": "industrial-utility",
+      "label": "Công nghiệp thực dụng",
+      "keywords": ["công nghiệp", "thô", "kim loại", "xây dựng", "industrial", "logistics", "cơ khí"],
+      "mood": "Chắc chắn, thẳng thắn, ưu tiên thông tin",
+      "bestFor": ["xây dựng", "cơ khí", "logistics", "vận tải", "sản xuất"],
+      "surfaces": ["landing", "dashboard", "auth"],
+      "avoid": "Không dùng cho mỹ phẩm, spa hoặc thương hiệu trẻ trung",
+      "perf": "Nhanh; ảnh công trình cần nén",
+      "a11y": "Màu vàng cam trên xám cần kiểm lại tương phản"
+    },
+    {
+      "id": "calm-wellness",
+      "label": "Tĩnh tại wellness",
+      "keywords": ["tĩnh", "thiền", "pastel", "chăm sóc", "calm", "yoga", "trị liệu", "spa"],
+      "mood": "Chậm, thở, không gây áp lực",
+      "bestFor": ["yoga", "trị liệu", "spa", "chăm sóc sức khỏe", "thiền"],
+      "surfaces": ["landing", "booking", "auth", "settings"],
+      "avoid": "Không dùng pastel nhạt cho chữ nhỏ và không làm mọi nút cùng một độ đậm",
+      "perf": "Nhanh",
+      "a11y": "Pastel rất dễ trượt tương phản; dùng màu đậm hơn cho chữ"
+    }
+  ]
+}

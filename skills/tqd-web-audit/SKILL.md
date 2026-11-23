@@ -7,7 +7,7 @@ compatibility: "macOS, Linux, Windows (Node.js >= 20)"
 license: "MIT"
 metadata:
   author: tqd
-  version: "2.2.0"
+  version: "2.3.0"
 ---
 
 # tqd-web-audit: Website Health, UX & Discovery Auditor

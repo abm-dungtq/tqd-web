@@ -7,7 +7,7 @@ compatibility: "macOS, Linux, Windows (Node.js >= 20)"
 license: "MIT"
 metadata:
   author: tqd
-  version: "2.2.0"
+  version: "2.3.0"
 ---
 
 # TQD Web App (Tier 3 Opt-In)
@@ -60,12 +60,25 @@ Default to managed serverless services so the owner avoids VPS patching, manual 
 
 | Layer | Default Choice | Why This Default |
 |---|---|---|
-| **App & APIs** | Next.js App Router (Route Handlers / Server Actions) | Single deployment unit on Vercel or Cloudflare |
+| **App & APIs** | Next.js App Router (Route Handlers / Server Actions) | Documented for Vercel; Cloudflare deployment via adapter is not verified in this repo |
 | **Database** | Neon Postgres, Supabase Postgres, or Cloudflare D1 | Managed scaling, pooler support, zero OS maintenance |
 | **ORM & Migrations** | Drizzle ORM or Prisma | Typed queries and repeatable SQL migrations |
 | **Authentication** | Better Auth (`emailAndPassword` + Google OAuth) | Built-in HTTP-only cookies, reset tokens, DB-backed sessions |
 | **Vietnam Payments** | SePay + VietQR (`vietqr.app`) | Automatic bank transfer matching and VND webhook alerts |
 | **Global Payments** | Polar (Merchant of Record) or Stripe | Global cards, subscriptions, and automated tax/VAT options |
+
+## Verification Status (2.3.0)
+
+This skill is documentation plus bundled payment scripts. It is **not** a tested app template; keep these limits visible before promising a stack:
+
+| Area | Status |
+|---|---|
+| Next.js App Router + Neon/Supabase (auth, API, migrations) | Documented; no end-to-end project test in this repo |
+| Cloudflare Workers + D1 (UI + API, empty/error states, permission checks) | **Not implemented or verified.** D1 is one database option, not the default; there is no local Workers/D1 fixture in this repo |
+| Dashboard, auth and settings UI | Design guidance only, from `tqd-web-design` `data/surfaces.json`; no runnable screens here |
+| SePay/Polar/Stripe verification scripts | Unit-tested offline; no live sandbox call is part of this repo's CI |
+
+Do not claim a Cloudflare Workers + D1 path works until a real slice has been run locally or in a target project: UI plus API plus D1 binding, with empty/loading/error states and a server-side permission check. Until then, say it is unverified.
 
 ## Implementation Workflow and Authority Boundaries
 
@@ -118,3 +131,4 @@ Report verified outcomes only; skipped stages or missing credentials remain list
 - Database migrations, backup/restore documentation, server-side input validation, and rate limits are in place without secrets committed to git or bundled into client code.
 - Authentication flows (sign-up, sign-in, server session checks, Google OAuth if requested, password reset, sign-out) are tested against real routes.
 - Sandbox checkout and signed webhook verification (including duplicate-delivery idempotency) pass; `node --test scripts/tests/*.mjs` passes when using bundled payment scripts; live keys remain disabled until explicit user approval.
+- Any Cloudflare Workers + D1 claim is backed by a run slice (UI, API, D1 binding, empty/error states, denied-permission check); otherwise report it as unverified.

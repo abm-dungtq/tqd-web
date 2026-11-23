@@ -7,7 +7,7 @@ compatibility: "macOS, Linux, Windows (Node.js >= 22)"
 license: "MIT"
 metadata:
   author: tqd
-  version: "2.2.0"
+  version: "2.3.0"
 ---
 
 # TQD Web Design: Visual Identity, Tokens, and Art-Directed UI
@@ -30,7 +30,20 @@ Translate plain-language business vibes ("ấm áp thủ công", "chuyên nghi�
 | New brand & website direction | `references/aesthetic-directions-and-industries.md`, `assets/starter-tokens-brand.css` | `docs/website/brand.md`, `tokens.css`, Hero preview |
 | Logo, monogram, or favicon only | `references/logo-and-brand-kit.md`, `scripts/extract-colors.cjs` | Light/dark SVG marks, `favicon.svg`, `docs/website/brand.md` |
 | Redesign existing site visuals | Existing CSS/components + `references/taste-exemplars.md` | Updated `tokens.css` and layout diff |
-| App, booking portal, or dashboard UI | `assets/starter-tokens-product.css`, `references/responsive-component-craft.md` | Product tokens + accessible interactive screens |
+| App, booking portal, or dashboard UI | `data/surfaces.json` via `scripts/design-intel.mjs`, `assets/starter-tokens-product.css`, `references/responsive-component-craft.md` | Product tokens + state map + accessible interactive screens |
+
+## Design Intelligence Lookup (Offline)
+
+Before proposing visual directions, pull a short list from the curated dataset instead of inventing a palette or font pair from memory:
+
+```bash
+node "${CLAUDE_SKILL_DIR}/scripts/design-intel.mjs" "<ngành + mood>" --surface <landing|menu|booking|dashboard|auth|settings>
+```
+
+- The script reads `data/*.json` only: 14 style directions, 21 contrast-checked palettes, 10 Vietnamese-safe font pairs, 29 UX rules, and 6 surface maps. No network, Python, or npm dependency.
+- Use it as a shortlist, not a decision: confirm one direction in plain language with the owner, then write `docs/website/brand.md` and `tokens.css` as usual.
+- For `dashboard`, `auth`, and `settings`, the brief also lists required empty/loading/error states and permission notes. Those are design guidance only: this skill does not build a running app, API, or database. A Cloudflare Workers + D1 app slice is **not implemented or verified** here; hand runtime work to `tqd-web-app` and state that limitation before promising it.
+- Add `--json` for machine-readable output, `--limit 1-5` to change the number of style candidates, `--plan` for a build checklist, and `--check` to validate the dataset and its 150 KB budget.
 
 ## Workflow Order (Preview Before Full Build)
 
@@ -95,6 +108,7 @@ Judge rendered pixels before declaring design work finished (`references/respons
 ## Done When
 
 - `docs/website/brand.md`, SVG logo/favicon assets (when created), and `tokens.css` reflect the user-approved visual direction.
+- New brands start from a `design-intel.mjs` brief (or the brief is explicitly waived by the owner); app surfaces include the required empty/loading/error states listed in `data/surfaces.json`.
 - `scripts/render-check.mjs` exits `0` across `375x812`, `768x1024`, and `1440x900` with clean screenshots and rubric scores logged (if no headless browser is available, report skipped browser checks explicitly).
 - `visual-ux-critic` passes the layout for customer clarity, Vietnamese typography, mobile touch targets, and anti-AI-slop compliance.
 
@@ -112,5 +126,8 @@ Judge rendered pixels before declaring design work finished (`references/respons
 | `scripts/extract-colors.cjs` | Extract brand palette from `brand.md` and check color compliance |
 | `scripts/sync-brand-to-tokens.cjs` | Generate `design-tokens.json` and `tokens.css` directly from `brand.md` |
 | `scripts/render-check.mjs` | Multi-viewport headless Chrome layout & screenshot diagnostic runner |
+| `scripts/design-intel.mjs` | Offline lookup over the curated style, palette, font, UX and surface data |
+| `data/*.json` | Curated design dataset (MIT, upstream commit pinned in `data/README.md`) |
+| `scripts/tests/design-intel.test.mjs` | Data integrity, contrast, font whitelist, attribution and CLI tests |
 | `scripts/tests/design-scripts.test.mjs` | Unit/CLI tests for color extraction and token sync |
 | `scripts/tests/render-check.test.mjs` | Automated fixture tests for `render-check.mjs` |

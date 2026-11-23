@@ -4,7 +4,7 @@
 
 # TQD Web Studio (`tqd-web`)
 
-**Phiên bản 2.2.0** · MIT · Antigravity IDE · Claude Code · Gemini CLI
+**Phiên bản 2.3.0** · MIT · Antigravity IDE · Claude Code · Gemini CLI
 
 Luật chung nằm ở `rules/AGENTS.md`: Gemini CLI tự nạp, Claude Code nạp qua từng skill, Antigravity chưa kiểm chứng.
 

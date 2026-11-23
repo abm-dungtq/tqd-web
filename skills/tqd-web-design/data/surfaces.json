@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "project": "nextlevelbuilder/ui-ux-pro-max-skill",
+    "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+    "commit": "281e4537afb11333ac9947783779aaf314ebfbf2",
+    "license": "MIT",
+    "upstreamFiles": ["src/ui-ux-pro-max/data/landing.csv", "src/ui-ux-pro-max/data/app-interface.csv"],
+    "note": "Cấu trúc màn hình viết lại cho 6 bề mặt; không phải component library và không kèm mã chạy."
+  },
+  "surfaces": [
+    {
+      "id": "landing",
+      "label": "Trang giới thiệu một trang",
+      "tier": 1,
+      "purpose": "Khách hiểu việc bạn làm trong 5 giây và bấm gọi/Zalo/đặt lịch.",
+      "sections": ["hero", "bang chứng thật", "dịch vụ hoặc sản phẩm", "quy trình", "bảng giá", "câu hỏi thường gặp", "liên hệ"],
+      "states": ["menu mobile mở/đóng", "form gửi thành công", "form lỗi"],
+      "mustHave": ["một hành động chính lặp lại", "số điện thoại bấm được", "ảnh thật hoặc [Cần bổ sung]", "thông tin liên hệ ở chân trang"],
+      "avoid": ["nhiều CTA ngang hàng", "ba thẻ icon giống nhau", "số liệu không có nguồn"],
+      "permission": ""
+    },
+    {
+      "id": "menu",
+      "label": "Thực đơn hoặc danh mục sản phẩm",
+      "tier": 1,
+      "purpose": "Khách quét nhanh món/sản phẩm, giá và cách đặt.",
+      "sections": ["tiêu đề ngắn", "bộ lọc hoặc nhóm", "lưới món/sản phẩm", "cách đặt", "liên hệ"],
+      "states": ["nhóm trống", "món tạm hết", "ảnh lỗi"],
+      "mustHave": ["giá hiển thị rõ", "mô tả ngắn", "nhãn hết hàng", "nút đặt hàng hoặc gọi"],
+      "avoid": ["ẩn giá", "bắt đăng nhập mới xem giá", "ảnh không có kích thước"],
+      "permission": ""
+    },
+    {
+      "id": "booking",
+      "label": "Đặt lịch hoặc đặt chỗ",
+      "tier": 2,
+      "purpose": "Khách chọn dịch vụ, thời gian và để lại thông tin trong ít bước.",
+      "sections": ["chọn dịch vụ", "chọn ngày giờ", "thông tin khách", "xác nhận", "biên nhận"],
+      "states": ["không còn khung giờ", "khung giờ vừa bị đặt", "gửi thành công", "gửi lỗi"],
+      "mustHave": ["múi giờ rõ", "tóm tắt trước khi gửi", "cách huỷ hoặc đổi", "thông báo xác nhận"],
+      "avoid": ["lịch tự chọn không báo còn trống", "nút gửi bấm lặp", "không có trạng thái chờ"],
+      "permission": "Nếu có tài khoản, chỉ hiện lịch của khách đó; API phải kiểm chủ sở hữu."
+    },
+    {
+      "id": "dashboard",
+      "label": "Bảng điều khiển",
+      "tier": 3,
+      "purpose": "Chủ website hoặc nhân viên xem số liệu và xử lý việc hằng ngày.",
+      "sections": ["khung ứng dụng", "điều hướng bên", "KPI hoặc tóm tắt", "bộ lọc", "bảng dữ liệu", "chi tiết bản ghi"],
+      "states": ["đang tải", "trống", "lỗi", "không có quyền", "bảng phân trang"],
+      "mustHave": ["trạng thái trống có hướng dẫn", "lỗi có cách thử lại", "bảng có header và sắp xếp", "hành động nguy hiểm có xác nhận"],
+      "avoid": ["dữ liệu giả để lấp bảng", "ẩn lỗi bằng bảng rỗng", "màu là cách duy nhất phân biệt trạng thái"],
+      "permission": "Ẩn hành động không có quyền ở UI, nhưng server/API vẫn kiểm quyền cho mọi thao tác."
+    },
+    {
+      "id": "auth",
+      "label": "Đăng nhập và tài khoản",
+      "tier": 3,
+      "purpose": "Khách vào tài khoản với ít ma sát và hiểu khi có lỗi.",
+      "sections": ["đăng nhập", "đăng ký", "quên mật khẩu", "xác minh email", "phiên hết hạn"],
+      "states": ["sai thông tin", "tài khoản bị khoá", "email chưa xác minh", "phiên hết hạn", "gửi lại thành công"],
+      "mustHave": ["nhãn field rõ", "thông báo lỗi trung tính", "nút hiện mật khẩu", "liên kết quên mật khẩu"],
+      "avoid": ["nói email có tồn tại hay không", "giới hạn độ dài mật khẩu vô lý", "chặn dán mật khẩu"],
+      "permission": "Không tiết lộ tài khoản có tồn tại; giới hạn số lần thử ở server."
+    },
+    {
+      "id": "settings",
+      "label": "Cài đặt tài khoản",
+      "tier": 3,
+      "purpose": "Người dùng đổi thông tin, quyền và bảo mật mà không làm hỏng dữ liệu.",
+      "sections": ["hồ sơ", "thông báo", "bảo mật", "quyền và thành viên", "vùng nguy hiểm"],
+      "states": ["đã lưu", "lỗi kiểm tra", "không có quyền", "đang lưu"],
+      "mustHave": ["nút lưu chỉ bật khi có thay đổi", "xác nhận trước khi xoá", "hiển thị ai có quyền gì"],
+      "avoid": ["lưu ngay mỗi lần gõ mà không báo", "xoá tài khoản một bước", "ẩn phạm vi quyền"],
+      "permission": "Đổi email/mật khẩu/quyền phải xác thực lại; server kiểm quyền, không tin giao diện."
+    }
+  ]
+}

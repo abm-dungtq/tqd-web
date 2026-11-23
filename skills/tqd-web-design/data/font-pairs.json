@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "project": "nextlevelbuilder/ui-ux-pro-max-skill",
+    "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+    "commit": "281e4537afb11333ac9947783779aaf314ebfbf2",
+    "license": "MIT",
+    "upstreamFile": "src/ui-ux-pro-max/data/typography.csv",
+    "note": "Chỉ giữ cặp font có subset tiếng Việt đã dùng trong plugin; không chép mô tả gốc."
+  },
+  "pairs": [
+    {
+      "id": "editorial-lora",
+      "label": "Biên tập Lora",
+      "display": "Lora",
+      "body": "Be Vietnam Pro",
+      "weights": "Lora 500/600 + Be Vietnam Pro 400/500/600",
+      "mood": "Ấm, có chất giấy, dễ đọc đoạn dài",
+      "bestFor": ["tiệm bánh", "cà phê", "nội thất", "blog", "nhà hàng"]
+    },
+    {
+      "id": "craft-fraunces",
+      "label": "Thủ công Fraunces",
+      "display": "Fraunces",
+      "body": "Be Vietnam Pro",
+      "weights": "Fraunces 500/600 + Be Vietnam Pro 400/500",
+      "mood": "Có cá tính, hơi cổ, phù hợp ảnh thật",
+      "bestFor": ["đồ thủ công", "gốm", "trà", "nông trại", "tiệm hoa"]
+    },
+    {
+      "id": "luxury-cormorant",
+      "label": "Sang trọng Cormorant",
+      "display": "Cormorant Garamond",
+      "body": "Be Vietnam Pro",
+      "weights": "Cormorant 500/600 + Be Vietnam Pro 400/500",
+      "mood": "Thanh mảnh, cổ điển, nhiều khoảng thở",
+      "bestFor": ["spa cao cấp", "trang sức", "khách sạn", "nhà hàng"]
+    },
+    {
+      "id": "modern-jakarta",
+      "label": "Hiện đại Jakarta",
+      "display": "Plus Jakarta Sans",
+      "body": "Be Vietnam Pro",
+      "weights": "Plus Jakarta Sans 600/700 + Be Vietnam Pro 400/500",
+      "mood": "Gọn, sạch, đáng tin",
+      "bestFor": ["saas", "b2b", "shop", "đặt lịch", "dịch vụ"]
+    },
+    {
+      "id": "product-jakarta-inter",
+      "label": "Sản phẩm Jakarta + Inter",
+      "display": "Plus Jakarta Sans",
+      "body": "Inter",
+      "weights": "Plus Jakarta Sans 600/700 + Inter 400/500",
+      "mood": "Trung tính, tối ưu giao diện nhiều nhãn",
+      "bestFor": ["dashboard", "app", "admin", "cài đặt"]
+    },
+    {
+      "id": "tech-manrope",
+      "label": "Kỹ thuật Manrope",
+      "display": "Manrope",
+      "body": "Be Vietnam Pro",
+      "weights": "Manrope 600/700 + Be Vietnam Pro 400/500",
+      "mood": "Rõ, hơi kỹ thuật, không lạnh",
+      "bestFor": ["công cụ", "dev", "tài chính", "b2b"]
+    },
+    {
+      "id": "neutral-inter",
+      "label": "Trung tính Inter",
+      "display": "Inter",
+      "body": "Be Vietnam Pro",
+      "weights": "Inter 600/700 + Be Vietnam Pro 400/500",
+      "mood": "An toàn, dễ đọc ở cỡ nhỏ",
+      "bestFor": ["app", "tài liệu", "y tế", "giáo dục", "luật"]
+    },
+    {
+      "id": "friendly-nunito",
+      "label": "Thân thiện Nunito",
+      "display": "Nunito",
+      "body": "Be Vietnam Pro",
+      "weights": "Nunito 600/700 + Be Vietnam Pro 400/500",
+      "mood": "Mềm, gần gũi, không trẻ con",
+      "bestFor": ["wellness", "trẻ em", "giáo dục", "chăm sóc"]
+    },
+    {
+      "id": "editorial-lora-nunito",
+      "label": "Biên tập Lora + Nunito",
+      "display": "Lora",
+      "body": "Nunito",
+      "weights": "Lora 500/600 + Nunito 400/500",
+      "mood": "Chữ dẫn chuyện, thân thiện hơn khi đọc nhanh",
+      "bestFor": ["tiệm bánh", "tiệm sách", "sự kiện", "lớp học"]
+    },
+    {
+      "id": "craft-fraunces-nunito",
+      "label": "Thủ công Fraunces + Nunito",
+      "display": "Fraunces",
+      "body": "Nunito",
+      "weights": "Fraunces 500/600 + Nunito 400/500",
+      "mood": "Có chất liệu, mềm hơn bản Be Vietnam Pro",
+      "bestFor": ["đồ thủ công", "mỹ phẩm thiên nhiên", "trà", "hoa"]
+    }
+  ]
+}

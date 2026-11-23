@@ -2,6 +2,25 @@
 
 Mọi thay đổi đáng chú ý của plugin `tqd-web` được ghi ở đây. Định dạng theo [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), phiên bản theo [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [2.3.0] - 2026-11-23
+
+### Thêm
+
+- `tqd-web-design/scripts/design-intel.mjs`: tra cứu thiết kế offline, không mạng, không Python, không gói npm. Nhận mô tả ngành + mood và một bề mặt (`landing`, `menu`, `booking`, `dashboard`, `auth`, `settings`), trả về hướng phong cách, bảng màu, cặp font, luật UX và trạng thái bắt buộc. `--plan` xuất kế hoạch dựng cụ thể; `--check` tự kiểm dữ liệu và ngân sách 150 KB.
+- Dữ liệu curate trong `tqd-web-design/data/`: 14 hướng phong cách, 21 bảng màu đã kiểm tương phản 4.5:1, 10 cặp font có subset tiếng Việt, 29 luật UX, 6 bề mặt. Nguồn MIT `nextlevelbuilder/ui-ux-pro-max-skill` commit `281e4537`, ghi ở `NOTICE.txt`, `data/README.md` và `data/LICENSE-upstream.txt`.
+- 13 test `intel:` kiểm dữ liệu, tương phản, whitelist font, ghi công, CLI, `--check` và `--plan`.
+
+### Thay đổi
+
+- `tqd-web-design`: bước tra cứu trước khi đề xuất hướng; bề mặt app (`dashboard`, `auth`, `settings`) có trạng thái trống/đang tải/lỗi và ghi chú quyền.
+- `tqd-web-app`: thêm bảng **Verification Status**. Cloudflare Workers + D1 (UI + API, trạng thái lỗi/rỗng, kiểm quyền) **chưa được triển khai hay kiểm chứng**; Next.js + Neon/Supabase mới ở mức tài liệu, chưa có test đầu-cuối. D1 là một lựa chọn DB, không phải mặc định.
+- `README`, `NOTICE`, `plugin.json`, marketplace và 6 `SKILL.md` sang `2.3.0`.
+
+### Ghi chú
+
+- Không thêm dependency npm hay Python; Tier 1 vẫn mở trực tiếp bằng `file://`.
+- Dữ liệu giữ dưới 150 KB; `design-intel` chỉ gợi ý, quyết định vẫn ở người thiết kế và chủ web.
+
 ## [2.2.0] - 2026-11-23
 
 ### Bảo mật

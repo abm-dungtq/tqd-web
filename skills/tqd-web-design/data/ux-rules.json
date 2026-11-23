@@ -1,0 +1,245 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "project": "nextlevelbuilder/ui-ux-pro-max-skill",
+    "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+    "commit": "281e4537afb11333ac9947783779aaf314ebfbf2",
+    "license": "MIT",
+    "upstreamFile": "src/ui-ux-pro-max/data/ux-guidelines.csv",
+    "note": "Rút gọn và viết lại cho website nhỏ; giữ các luật có thể kiểm bằng mắt hoặc bằng render-check."
+  },
+  "rules": [
+    {
+      "id": "focus-visible",
+      "category": "accessibility",
+      "severity": "critical",
+      "surfaces": ["landing", "menu", "booking", "dashboard", "auth", "settings"],
+      "rule": "Không xoá focus ring; dùng :focus-visible rõ trên nền sáng và tối.",
+      "why": "Người dùng bàn phím không biết mình đang ở đâu."
+    },
+    {
+      "id": "contrast-body",
+      "category": "accessibility",
+      "severity": "critical",
+      "surfaces": ["landing", "menu", "booking", "dashboard", "auth", "settings"],
+      "rule": "Chữ thân bài đạt tương phản tối thiểu 4.5:1; tiêu đề lớn và viền điều khiển đạt 3:1.",
+      "why": "Điện thoại ngoài trời làm chữ nhạt không đọc được."
+    },
+    {
+      "id": "form-labels",
+      "category": "accessibility",
+      "severity": "critical",
+      "surfaces": ["landing", "menu", "booking", "auth", "settings"],
+      "rule": "Mỗi ô nhập có <label> thật, không chỉ placeholder.",
+      "why": "Placeholder biến mất khi gõ và trình đọc màn hình không đọc được."
+    },
+    {
+      "id": "alt-text",
+      "category": "accessibility",
+      "severity": "high",
+      "surfaces": ["landing", "menu"],
+      "rule": "Ảnh mang thông tin có alt mô tả; ảnh trang trí đặt alt=\"\".",
+      "why": "Ảnh hỏng hoặc trình đọc màn hình vẫn cần nghĩa."
+    },
+    {
+      "id": "keyboard-overlay",
+      "category": "accessibility",
+      "severity": "critical",
+      "surfaces": ["landing", "menu", "booking", "dashboard", "auth", "settings"],
+      "rule": "Menu, dialog và popover đóng được bằng Esc, giữ focus trong dialog và trả focus về nút mở.",
+      "why": "Người chỉ dùng bàn phím bị kẹt trong lớp phủ."
+    },
+    {
+      "id": "error-not-color",
+      "category": "accessibility",
+      "severity": "high",
+      "surfaces": ["landing", "booking", "dashboard", "auth", "settings"],
+      "rule": "Trạng thái lỗi có chữ hoặc icon kèm màu, không chỉ đổi viền đỏ.",
+      "why": "Người mù màu không nhận ra lỗi."
+    },
+    {
+      "id": "reduced-motion",
+      "category": "accessibility",
+      "severity": "high",
+      "surfaces": ["landing", "menu", "booking", "dashboard", "auth", "settings"],
+      "rule": "Bọc hiệu ứng trong @media (prefers-reduced-motion: reduce) và tắt chuyển động lớn.",
+      "why": "Chuyển động mạnh gây chóng mặt ở người nhạy cảm."
+    },
+    {
+      "id": "icon-label",
+      "category": "accessibility",
+      "severity": "high",
+      "surfaces": ["landing", "menu", "booking", "dashboard", "settings"],
+      "rule": "Nút chỉ có icon phải có nhãn đọc được (aria-label hoặc chữ ẩn).",
+      "why": "Icon không nói lên hành động với trình đọc màn hình."
+    },
+    {
+      "id": "target-44",
+      "category": "touch",
+      "severity": "critical",
+      "surfaces": ["landing", "menu", "booking", "dashboard", "auth", "settings"],
+      "rule": "Mọi vùng bấm đạt tối thiểu 44x44px, kể cả icon và link trong chân trang.",
+      "why": "Ngón tay trên mobile bấm trượt sang mục khác."
+    },
+    {
+      "id": "tap-spacing",
+      "category": "touch",
+      "severity": "medium",
+      "surfaces": ["landing", "menu", "booking", "dashboard", "settings"],
+      "rule": "Hai vùng bấm cạnh nhau cách nhau tối thiểu 8px.",
+      "why": "Giảm bấm nhầm khi tay ướt hoặc đang di chuyển."
+    },
+    {
+      "id": "tap-feedback",
+      "category": "touch",
+      "severity": "medium",
+      "surfaces": ["landing", "menu", "booking", "dashboard", "auth", "settings"],
+      "rule": "Mỗi hành động có phản hồi trong 100ms (đổi màu, loading, hoặc thông báo).",
+      "why": "Không phản hồi khiến người dùng bấm lại nhiều lần."
+    },
+    {
+      "id": "field-errors",
+      "category": "forms",
+      "severity": "high",
+      "surfaces": ["landing", "booking", "auth", "settings"],
+      "rule": "Lỗi hiện ngay dưới ô nhập và có tóm tắt lỗi ở đầu form khi form dài.",
+      "why": "Lỗi chỉ ở đầu trang làm người dùng không biết ô nào sai."
+    },
+    {
+      "id": "input-types",
+      "category": "forms",
+      "severity": "medium",
+      "surfaces": ["landing", "booking", "auth", "settings"],
+      "rule": "Dùng type/inputmode đúng: tel, email, number, và autocomplete cho tên, số điện thoại, email.",
+      "why": "Bàn phím sai làm nhập liệu chậm và dễ sai."
+    },
+    {
+      "id": "submit-loading",
+      "category": "forms",
+      "severity": "high",
+      "surfaces": ["landing", "booking", "auth", "settings"],
+      "rule": "Khi gửi, nút chuyển sang trạng thái đang gửi và chặn bấm lặp; không chỉ disable im lặng.",
+      "why": "Người dùng không biết form đã gửi hay chưa."
+    },
+    {
+      "id": "success-confirm",
+      "category": "forms",
+      "severity": "high",
+      "surfaces": ["landing", "booking", "auth", "settings"],
+      "rule": "Sau khi gửi thành công, hiện thông báo xác nhận và bước tiếp theo rõ ràng.",
+      "why": "Không có xác nhận dẫn tới gửi trùng."
+    },
+    {
+      "id": "sticky-padding",
+      "category": "navigation",
+      "severity": "medium",
+      "surfaces": ["landing", "menu"],
+      "rule": "Nếu header dính, chừa padding-top cho nội dung để tiêu đề không bị che.",
+      "why": "Tiêu đề mục bị header nuốt mất khi bấm neo."
+    },
+    {
+      "id": "active-state",
+      "category": "navigation",
+      "severity": "medium",
+      "surfaces": ["landing", "menu", "dashboard"],
+      "rule": "Mục đang xem có dấu hiệu rõ (màu, gạch chân, hoặc chữ đậm).",
+      "why": "Người dùng không biết mình đang ở đâu."
+    },
+    {
+      "id": "back-safe",
+      "category": "navigation",
+      "severity": "high",
+      "surfaces": ["landing", "menu", "booking", "dashboard", "auth", "settings"],
+      "rule": "Mọi màn hình mở từ một màn hình khác đều quay lại được bằng nút Back.",
+      "why": "Chặn Back là lỗi nghiêm trọng trên mobile."
+    },
+    {
+      "id": "mobile-nav-dismiss",
+      "category": "navigation",
+      "severity": "high",
+      "surfaces": ["landing", "menu", "dashboard"],
+      "rule": "Menu mobile đóng khi chọn mục, khi bấm ra ngoài và khi bấm Esc.",
+      "why": "Menu kẹt che nội dung và không có lối thoát."
+    },
+    {
+      "id": "motion-budget",
+      "category": "motion",
+      "severity": "medium",
+      "surfaces": ["landing", "menu", "booking", "dashboard", "auth", "settings"],
+      "rule": "Chuyển động UI 150–300ms, chỉ dùng transform và opacity; không animate width/height.",
+      "why": "Animate layout gây giật và tốn pin."
+    },
+    {
+      "id": "no-autoplay",
+      "category": "motion",
+      "severity": "high",
+      "surfaces": ["landing", "menu"],
+      "rule": "Không tự chạy video/âm thanh; nếu có, phải có nút tắt và không dùng làm nền cho chữ.",
+      "why": "Tự chạy làm chậm máy và gây khó chịu."
+    },
+    {
+      "id": "reserve-space",
+      "category": "performance",
+      "severity": "high",
+      "surfaces": ["landing", "menu", "dashboard"],
+      "rule": "Ảnh và khung nhúng có width/height hoặc aspect-ratio để giữ chỗ trước khi tải.",
+      "why": "Nội dung nhảy khi ảnh tải xong (CLS)."
+    },
+    {
+      "id": "font-budget",
+      "category": "performance",
+      "severity": "medium",
+      "surfaces": ["landing", "menu", "booking", "dashboard", "auth", "settings"],
+      "rule": "Tối đa 2 họ font và 3–4 độ đậm; tải bằng display=swap và subset vietnamese.",
+      "why": "Nhiều font làm chậm và tăng nguy cơ nháy chữ."
+    },
+    {
+      "id": "no-fake-proof",
+      "category": "content",
+      "severity": "critical",
+      "surfaces": ["landing", "menu", "booking"],
+      "rule": "Không bịa đánh giá, số khách, logo đối tác hay chỉ số; thiếu thì ghi [Cần bổ sung].",
+      "why": "Bằng chứng giả phá niềm tin và có thể vi phạm pháp luật."
+    },
+    {
+      "id": "vietnamese-diacritics",
+      "category": "content",
+      "severity": "high",
+      "surfaces": ["landing", "menu", "booking", "dashboard", "auth", "settings"],
+      "rule": "Dấu tiếng Việt không bị cắt; line-height tiêu đề 1.18–1.28 và font có subset vietnamese.",
+      "why": "Dấu chồng bị cắt làm câu sai nghĩa."
+    },
+    {
+      "id": "no-emoji-icons",
+      "category": "content",
+      "severity": "medium",
+      "surfaces": ["landing", "menu", "booking", "dashboard"],
+      "rule": "Không dùng emoji làm icon chức năng; dùng SVG cùng bộ.",
+      "why": "Emoji khác nhau trên từng máy và trông thiếu chuyên nghiệp."
+    },
+    {
+      "id": "chart-color-not-only",
+      "category": "charts",
+      "severity": "high",
+      "surfaces": ["dashboard"],
+      "rule": "Biểu đồ không truyền nghĩa chỉ bằng màu; dùng nhãn, hình dạng hoặc mẫu tô.",
+      "why": "Người mù màu không đọc được chuỗi dữ liệu."
+    },
+    {
+      "id": "chart-states",
+      "category": "charts",
+      "severity": "medium",
+      "surfaces": ["dashboard"],
+      "rule": "Biểu đồ có trạng thái trống, đang tải, lỗi và mô tả chữ cho dữ liệu chính.",
+      "why": "Dữ liệu chưa về trông như biểu đồ hỏng."
+    },
+    {
+      "id": "hide-unauthorized",
+      "category": "permissions",
+      "severity": "critical",
+      "surfaces": ["dashboard", "settings"],
+      "rule": "Ẩn hoặc vô hiệu hoá hành động không có quyền ở giao diện, nhưng API phía server vẫn phải kiểm quyền.",
+      "why": "Ẩn nút không phải bảo mật; người dùng vẫn gọi API trực tiếp được."
+    }
+  ]
+}
