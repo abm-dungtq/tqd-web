@@ -27,7 +27,7 @@ const SAMPLE_SEPAY_PAYLOAD = {
 };
 
 test('SePayWebhookVerifier: none mode validates valid incoming and outgoing payloads', () => {
-  const verifier = new SePayWebhookVerifier('none');
+  const verifier = new SePayWebhookVerifier('none', null, { allowUnauthenticated: true });
 
   const incoming = verifier.process(SAMPLE_SEPAY_PAYLOAD);
   assert.equal(incoming.success, true);
@@ -44,7 +44,7 @@ test('SePayWebhookVerifier: none mode validates valid incoming and outgoing payl
 });
 
 test('SePayWebhookVerifier: rejects invalid payload structure and amounts', () => {
-  const verifier = new SePayWebhookVerifier('none');
+  const verifier = new SePayWebhookVerifier('none', null, { allowUnauthenticated: true });
 
   const badType = verifier.process({ ...SAMPLE_SEPAY_PAYLOAD, transferType: 'refund' });
   assert.equal(badType.success, false);
@@ -155,7 +155,7 @@ test('SePayWebhookVerifier: hmac mode verifies signature, rejects tampering, and
 });
 
 test('SePayWebhookVerifier: isDuplicate detects seen transaction ids', () => {
-  const verifier = new SePayWebhookVerifier('none');
+  const verifier = new SePayWebhookVerifier('none', null, { allowUnauthenticated: true });
   const seen = new Set([92704]);
   assert.equal(verifier.isDuplicate(92704, seen), true);
   assert.equal(verifier.isDuplicate(92705, seen), false);
@@ -176,6 +176,108 @@ test('SePayWebhookVerifier: oauth2 requires verifier callback and supports Web H
 
   const goodToken = withCallback.process(SAMPLE_SEPAY_PAYLOAD, new Headers({ Authorization: 'Bearer valid_secret_token' }));
   assert.equal(goodToken.success, true);
+});
+
+test('fail-closed: constructor without authType throws', () => {
+  assert.throws(() => new SePayWebhookVerifier(), /authType is required/);
+  assert.throws(() => new SePayWebhookVerifier('basic'), /authType is required/);
+});
+
+test('fail-closed: none without allowUnauthenticated throws', () => {
+  assert.throws(() => new SePayWebhookVerifier('none'), /allowUnauthenticated/);
+  assert.throws(() => new SePayWebhookVerifier('none', null, { allowUnauthenticated: 'yes' }), /allowUnauthenticated/);
+});
+
+test('fail-closed: none is rejected when NODE_ENV=production', () => {
+  const previous = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  try {
+    assert.throws(
+      () => new SePayWebhookVerifier('none', null, { allowUnauthenticated: true }),
+      /disabled when NODE_ENV=production/
+    );
+  } finally {
+    if (previous === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = previous;
+  }
+});
+
+const BEARER = { Authorization: 'Bearer forged_token' };
+
+test('fail-closed: sync process rejects an async oauth2 verifier', () => {
+  for (const answer of [false, true]) {
+    const verifier = new SePayWebhookVerifier('oauth2', null, { verifyOAuth2Token: async () => answer });
+    const result = verifier.process(SAMPLE_SEPAY_PAYLOAD, BEARER);
+    assert.equal(result.success, false);
+    assert.match(result.error, /Promise/);
+  }
+});
+
+test('fail-closed: processAsync rejects when async verifier resolves false', async () => {
+  const verifier = new SePayWebhookVerifier('oauth2', null, { verifyOAuth2Token: async () => false });
+  const result = await verifier.processAsync(SAMPLE_SEPAY_PAYLOAD, BEARER);
+  assert.equal(result.success, false);
+  assert.equal(result.error, 'Invalid or expired OAuth2 Bearer token');
+});
+
+test('fail-closed: processAsync accepts when async verifier resolves true', async () => {
+  const verifier = new SePayWebhookVerifier('oauth2', null, {
+    verifyOAuth2Token: async (token) => token === 'valid_secret_token'
+  });
+  const result = await verifier.processAsync(JSON.stringify(SAMPLE_SEPAY_PAYLOAD), {
+    Authorization: 'Bearer valid_secret_token'
+  });
+  assert.equal(result.success, true);
+  assert.equal(result.transaction.id, 92704);
+});
+
+test('fail-closed: oauth2 verifier returning a truthy non-true value is rejected', async () => {
+  for (const answer of ['yes', 1, {}]) {
+    const verifier = new SePayWebhookVerifier('oauth2', null, { verifyOAuth2Token: () => answer });
+    const sync = verifier.process(SAMPLE_SEPAY_PAYLOAD, BEARER);
+    assert.equal(sync.success, false);
+    assert.equal(sync.error, 'Invalid or expired OAuth2 Bearer token');
+    const viaAsync = await verifier.processAsync(SAMPLE_SEPAY_PAYLOAD, BEARER);
+    assert.equal(viaAsync.success, false);
+    assert.equal(viaAsync.error, 'Invalid or expired OAuth2 Bearer token');
+  }
+});
+
+test('fail-closed: hmac result comes from the signed body, not the passed object', () => {
+  const secret = 'sepay_hmac_secret_test';
+  const fixedNow = 1770000000;
+  const verifier = new SePayWebhookVerifier('hmac', secret, { now: () => fixedNow });
+  const signedBody = JSON.stringify(SAMPLE_SEPAY_PAYLOAD);
+  const ts = String(fixedNow - 30);
+  const headers = {
+    'X-SePay-Signature': SePayWebhookVerifier.sign(secret, ts, signedBody),
+    'X-SePay-Timestamp': ts
+  };
+  const unsignedObject = { ...SAMPLE_SEPAY_PAYLOAD, id: 1, transferAmount: 999999999 };
+
+  const result = verifier.process(unsignedObject, headers, signedBody);
+  assert.equal(result.success, true);
+  assert.equal(result.transaction.id, 92704);
+  assert.equal(result.transaction.transferAmount, 250000);
+});
+
+test('fail-closed: sync process survives an async verifier that rejects', async () => {
+  const unhandled = [];
+  const onUnhandled = (reason) => unhandled.push(reason);
+  process.on('unhandledRejection', onUnhandled);
+  try {
+    const verifier = new SePayWebhookVerifier('oauth2', null, {
+      verifyOAuth2Token: async () => { throw new Error('boom'); }
+    });
+    const result = verifier.process(SAMPLE_SEPAY_PAYLOAD, BEARER);
+    assert.equal(result.success, false);
+    assert.match(result.error, /Promise/);
+    await new Promise((resolve) => setImmediate(resolve));
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.deepEqual(unhandled, []);
+  } finally {
+    process.off('unhandledRejection', onUnhandled);
+  }
 });
 
 test('PolarWebhookVerifier: verifies Standard Webhooks and legacy Polar HMAC schemes', () => {

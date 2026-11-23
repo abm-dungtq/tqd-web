@@ -43,7 +43,7 @@ For hosted SePay checkout forms (gateway redirect), generate signed fields with 
 
 ### Verifying SePay Webhooks (`POST /api/webhooks/sepay`)
 
-SePay supports `hmac` (recommended), `api_key`, `oauth2` (requires passing `options.verifyOAuth2Token` to validate tokens against your token store), and `none` (local testing only). Use `SePayWebhookVerifier` from `./scripts/sepay-webhook-verify.js`:
+SePay supports `hmac` (recommended), `api_key`, and `oauth2` (requires passing `options.verifyOAuth2Token`, which must return exactly `true` to accept a token; when that callback is async, call `await verifier.processAsync(...)` instead of `process(...)`). The auth mode is required: `none` exists only for local dry-runs, needs `options.allowUnauthenticated: true`, and is refused when `NODE_ENV=production`. Use `SePayWebhookVerifier` from `./scripts/sepay-webhook-verify.js`:
 
 1. Capture the raw request string (`const rawBody = await request.text()`) before parsing JSON so HMAC verification sees exact bytes.
 2. Verify headers using `hmac` (`X-SePay-Signature: sha256=...` and `X-SePay-Timestamp` within 300 seconds) or `api_key` (`Authorization: Apikey <key>`). Reject invalid signatures with HTTP `401`.

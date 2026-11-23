@@ -93,7 +93,7 @@ Load only the reference matching the active subtask so context stays focused:
 
 Bundled Node.js (`>= 20`) scripts run cross-platform on macOS, Linux, and Windows using Node standard library `crypto` only:
 
-- [scripts/sepay-webhook-verify.js](scripts/sepay-webhook-verify.js) — `SePayWebhookVerifier` supporting `hmac`, `api_key`, `oauth2`, and `none` verification modes.
+- [scripts/sepay-webhook-verify.js](scripts/sepay-webhook-verify.js) — `SePayWebhookVerifier`; the auth mode is required (`hmac`, `api_key`, or `oauth2`). `none` is a local dry-run only: it needs `allowUnauthenticated: true` and is refused when `NODE_ENV=production`. Async `oauth2` token verifiers must use `processAsync`.
 - [scripts/polar-webhook-verify.js](scripts/polar-webhook-verify.js) — `PolarWebhookVerifier` supporting both modern `whsec_` Standard Webhooks and legacy Polar HMAC signatures.
 - [scripts/checkout-helper.js](scripts/checkout-helper.js) — `CheckoutHelper` generating signed SePay checkout forms and Polar checkout API payloads.
 - [scripts/tests/payment-scripts.test.mjs](scripts/tests/payment-scripts.test.mjs) — `node:test` verification suite for all bundled payment scripts.

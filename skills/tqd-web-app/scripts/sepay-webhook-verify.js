@@ -9,7 +9,8 @@
  *               X-SePay-Timestamp: unix seconds (rejected when older/newer than 5 minutes)
  *   - api_key : Authorization: Apikey {API_KEY}
  *   - oauth2  : Authorization: Bearer {token issued by YOUR token endpoint}
- *   - none    : no authentication (testing only)
+ *   - none    : no authentication (local dry-run only; needs
+ *               options.allowUnauthenticated: true, refused when NODE_ENV=production)
  *
  * A delivery only counts as successful when your endpoint answers
  * HTTP 200/201 with body exactly {"success": true} within 30 seconds.
@@ -18,7 +19,8 @@
  *   node sepay-webhook-verify.js <webhook-payload-json>
  *
  * Environment Variables:
- *   SEPAY_WEBHOOK_AUTH_TYPE - hmac | api_key | oauth2 | none (default: none)
+ *   SEPAY_WEBHOOK_AUTH_TYPE - hmac | api_key | oauth2 | none
+ *                             (CLI default: none, local dry-run only; refused when NODE_ENV=production)
  *   SEPAY_WEBHOOK_SECRET    - HMAC-SHA256 secret key (hmac)
  *   SEPAY_WEBHOOK_API_KEY   - API key (api_key)
  */
@@ -26,6 +28,7 @@
 const crypto = require('crypto');
 
 const SIGNATURE_TOLERANCE_SECONDS = 300;
+const AUTH_TYPES = ['hmac', 'api_key', 'oauth2', 'none'];
 
 function getHeader(headers, name) {
   if (!headers) return undefined;
@@ -51,11 +54,21 @@ function safeEqual(a, b) {
 
 class SePayWebhookVerifier {
   /**
-   * @param {'none'|'api_key'|'hmac'|'oauth2'} authType
+   * @param {'api_key'|'hmac'|'oauth2'|'none'} authType required; there is no default
    * @param {string|null} secret API key (api_key) or HMAC secret key (hmac)
-   * @param {{ toleranceSeconds?: number, now?: () => number }} options
+   * @param {{ toleranceSeconds?: number, now?: () => number, verifyOAuth2Token?: Function, allowUnauthenticated?: boolean }} options
+   *   `verifyOAuth2Token` must return exactly `true` to accept a token; async verifiers require processAsync().
    */
-  constructor(authType = 'none', secret = null, options = {}) {
+  constructor(authType, secret = null, options = {}) {
+    if (!AUTH_TYPES.includes(authType)) {
+      throw new Error('authType is required: hmac | api_key | oauth2 | none');
+    }
+    if (authType === 'none' && options.allowUnauthenticated !== true) {
+      throw new Error('authType "none" requires options.allowUnauthenticated: true (local testing only)');
+    }
+    if (authType === 'none' && process.env.NODE_ENV === 'production') {
+      throw new Error('authType "none" is disabled when NODE_ENV=production');
+    }
     this.authType = authType;
     this.secret = secret;
     this.apiKey = secret; // kept for callers of the previous API-key-only verifier
@@ -121,21 +134,54 @@ class SePayWebhookVerifier {
     }
 
     if (this.authType === 'oauth2') {
-      const authHeader = getHeader(headers, 'authorization');
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        throw new Error('Missing or invalid OAuth2 Bearer token');
+      const token = this.readOAuth2Token(headers);
+      const verdict = this.verifyOAuth2Token(token, headers, rawBody);
+      if (verdict != null && typeof verdict.then === 'function') {
+        // Swallow a later rejection so it cannot crash the process as unhandled.
+        Promise.resolve(verdict).catch(() => {});
+        throw new Error('verifyOAuth2Token returned a Promise; call processAsync() for async token verifiers');
       }
-      if (!this.verifyOAuth2Token) {
-        throw new Error('OAuth2 token verifier callback required');
-      }
-      const token = authHeader.slice('Bearer '.length).trim();
-      if (!token || !this.verifyOAuth2Token(token, headers, rawBody)) {
+      if (verdict !== true) {
         throw new Error('Invalid or expired OAuth2 Bearer token');
       }
       return true;
     }
 
     throw new Error(`Unknown auth type: ${this.authType}`);
+  }
+
+  /**
+   * Header and callback checks shared by the sync and async oauth2 paths.
+   * @returns {string} the non-empty Bearer token
+   */
+  readOAuth2Token(headers) {
+    const authHeader = getHeader(headers, 'authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new Error('Missing or invalid OAuth2 Bearer token');
+    }
+    if (!this.verifyOAuth2Token) {
+      throw new Error('OAuth2 token verifier callback required');
+    }
+    const token = authHeader.slice('Bearer '.length).trim();
+    if (!token) {
+      throw new Error('Invalid or expired OAuth2 Bearer token');
+    }
+    return token;
+  }
+
+  /**
+   * Same as verifyAuthentication, but awaits an async oauth2 token verifier.
+   */
+  async verifyAuthenticationAsync(headers = {}, rawBody = null) {
+    if (this.authType !== 'oauth2') {
+      return this.verifyAuthentication(headers, rawBody);
+    }
+    const token = this.readOAuth2Token(headers);
+    const verdict = await this.verifyOAuth2Token(token, headers, rawBody);
+    if (verdict !== true) {
+      throw new Error('Invalid or expired OAuth2 Bearer token');
+    }
+    return true;
   }
 
   /**
@@ -184,42 +230,16 @@ class SePayWebhookVerifier {
    * Process a webhook.
    * @param {object|string} payload parsed JSON object, or the raw body string
    * @param {object} headers request headers
-   * @param {string} [rawBody] raw body string (required for hmac when payload is an object)
+   * @param {string} [rawBody] raw body string (required for hmac when payload is an object).
+   *   Whenever a body string is available the result is built from that string,
+   *   never from the object passed alongside it.
    */
   process(payload, headers = {}, rawBody = undefined) {
     try {
       const body = typeof payload === 'string' ? payload : rawBody;
-      const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
-
-      // 1. Verify authentication
+      const data = typeof body === 'string' ? JSON.parse(body) : payload;
       this.verifyAuthentication(headers, body ?? null);
-
-      // 2. Validate payload structure
-      this.validatePayload(data);
-
-      // 3. Extract transaction data
-      const transaction = {
-        id: data.id,
-        gateway: data.gateway,
-        transactionDate: data.transactionDate, // "YYYY-MM-DD HH:mm:ss", Vietnam time (UTC+7)
-        accountNumber: data.accountNumber,
-        subAccount: data.subAccount || null,
-        code: data.code ?? null,
-        content: data.content || '',
-        description: data.description || '',
-        transferType: data.transferType,
-        transferAmount: data.transferAmount,
-        accumulated: data.accumulated || 0,
-        referenceCode: data.referenceCode || ''
-      };
-
-      return {
-        success: true,
-        transaction,
-        isIncoming: transaction.transferType === 'in',
-        isOutgoing: transaction.transferType === 'out',
-        response: { status: 200, body: { success: true } }
-      };
+      return this.buildResult(data);
     } catch (error) {
       return {
         success: false,
@@ -227,12 +247,60 @@ class SePayWebhookVerifier {
       };
     }
   }
+
+  /**
+   * Async variant of process() for oauth2 verifiers that return a Promise.
+   */
+  async processAsync(payload, headers = {}, rawBody = undefined) {
+    try {
+      const body = typeof payload === 'string' ? payload : rawBody;
+      const data = typeof body === 'string' ? JSON.parse(body) : payload;
+      await this.verifyAuthenticationAsync(headers, body ?? null);
+      return this.buildResult(data);
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Validate an authenticated payload and normalize the transaction.
+   */
+  buildResult(data) {
+    this.validatePayload(data);
+
+    const transaction = {
+      id: data.id,
+      gateway: data.gateway,
+      transactionDate: data.transactionDate, // "YYYY-MM-DD HH:mm:ss", Vietnam time (UTC+7)
+      accountNumber: data.accountNumber,
+      subAccount: data.subAccount || null,
+      code: data.code ?? null,
+      content: data.content || '',
+      description: data.description || '',
+      transferType: data.transferType,
+      transferAmount: data.transferAmount,
+      accumulated: data.accumulated || 0,
+      referenceCode: data.referenceCode || ''
+    };
+
+    return {
+      success: true,
+      transaction,
+      isIncoming: transaction.transferType === 'in',
+      isOutgoing: transaction.transferType === 'out',
+      response: { status: 200, body: { success: true } }
+    };
+  }
 }
 
 function printSepayHelp() {
   console.log('Usage: node sepay-webhook-verify.js <webhook-payload-json>');
   console.log('\nEnvironment Variables:');
-  console.log('  SEPAY_WEBHOOK_AUTH_TYPE - hmac, api_key, oauth2, none (default: none)');
+  console.log('  SEPAY_WEBHOOK_AUTH_TYPE - hmac, api_key, oauth2, none');
+  console.log('                            (default: none, local dry-run only; refused when NODE_ENV=production)');
   console.log('  SEPAY_WEBHOOK_SECRET    - HMAC-SHA256 secret key (hmac)');
   console.log('  SEPAY_WEBHOOK_API_KEY   - API key (api_key)');
 }
@@ -258,7 +326,10 @@ if (require.main === module) {
       ? process.env.SEPAY_WEBHOOK_SECRET || null
       : process.env.SEPAY_WEBHOOK_API_KEY || null;
 
-    const verifier = new SePayWebhookVerifier(authType, secret);
+    if (authType === 'none') {
+      console.error('WARNING: no webhook authentication (local dry-run only). Set SEPAY_WEBHOOK_AUTH_TYPE=hmac|api_key for real traffic.');
+    }
+    const verifier = new SePayWebhookVerifier(authType, secret, { allowUnauthenticated: authType === 'none' });
 
     // Simulated SePay headers for local CLI testing
     const headers = {};
