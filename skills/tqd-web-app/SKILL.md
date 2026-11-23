@@ -76,7 +76,8 @@ This skill is documentation plus bundled payment scripts. It is **not** a tested
 | Next.js App Router + Neon/Supabase (auth, API, migrations) | Documented; no end-to-end project test in this repo |
 | Cloudflare Workers + D1 (UI + API, empty/error states, permission checks) | **Not implemented or verified.** D1 is one database option, not the default; there is no local Workers/D1 fixture in this repo |
 | Dashboard, auth and settings UI | Design guidance only, from `tqd-web-design` `data/surfaces.json`; no runnable screens here |
-| SePay/Polar/Stripe verification scripts | Unit-tested offline; no live sandbox call is part of this repo's CI |
+| SePay and Polar webhook verifiers (`scripts/sepay-webhook-verify.js`, `scripts/polar-webhook-verify.js`) and `scripts/checkout-helper.js` | Unit-tested offline; no live sandbox call is part of this repo's CI |
+| Stripe checkout/webhook | Reference guidance only (`references/sepay-vietqr-and-stripe.md`); no bundled or tested verifier script |
 
 Do not claim a Cloudflare Workers + D1 path works until a real slice has been run locally or in a target project: UI plus API plus D1 binding, with empty/loading/error states and a server-side permission check. Until then, say it is unverified.
 

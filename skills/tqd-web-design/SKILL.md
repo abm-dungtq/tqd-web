@@ -43,9 +43,11 @@ node "${CLAUDE_SKILL_DIR}/scripts/design-intel.mjs" "<ngành + mood>" --surface 
 Surfaces: `landing` (default), `menu`, `booking`, `dashboard`, `auth`, `settings`.
 
 - The script reads `data/*.json` only: 14 style directions, 21 contrast-checked palettes, 10 Vietnamese-safe font pairs, 29 UX rules, and 6 surface maps. No network, Python, or npm dependency.
+- If the query matches no keyword, the output says so (`"matched": false`) and `--plan` lists references instead of choosing a direction; ask the owner for an industry and mood before proceeding.
 - Use it as a shortlist, not a decision: confirm one direction in plain language with the owner, then write `docs/website/brand.md` and `tokens.css` as usual.
 - For `dashboard`, `auth`, and `settings`, the brief also lists required empty/loading/error states and permission notes. Those are design guidance only: this skill does not build a running app, API, or database. A Cloudflare Workers + D1 app slice is **not implemented or verified** here; hand runtime work to `tqd-web-app` and state that limitation before promising it.
 - Add `--json` for machine-readable output, `--limit 1-5` to change the number of style candidates, `--plan` for a build checklist, and `--check` to validate the dataset and its 150 KB budget.
+- **External DESIGN.md library (optional):** `--refs <dir>` or `TQD_DESIGN_REFS=<dir>` also ranks a folder of DESIGN.md files the user already holds (e.g. Refero Styles exports) by visual tags and zero-or-more industry tags (`unknown` when evidence is thin). Keep that folder outside every repository, never commit or convert it, treat its usage rights as unverified unless the holder confirms them, and borrow structure only (scale, rhythm, colour discipline) with Vietnamese-safe fonts. Rules: `references/external-design-md.md`.
 
 ## Workflow Order (Preview Before Full Build)
 
@@ -125,6 +127,7 @@ Judge rendered pixels before declaring design work finished (`references/respons
 | `references/logo-and-brand-kit.md` | SVG mark/favicon rules and `docs/website/brand.md` template |
 | `references/taste-exemplars.md` | Code-backed typical vs tasteful UI comparisons |
 | `references/responsive-component-craft.md` | Accessible states, motion, Tier 1/2 wiring, `render-check` rubric |
+| `references/external-design-md.md` | Optional `--refs` DESIGN.md library: usage rights, tagging limits, conversion rules |
 | `scripts/extract-colors.cjs` | Extract brand palette from `brand.md` and check color compliance |
 | `scripts/sync-brand-to-tokens.cjs` | Generate `design-tokens.json` and `tokens.css` directly from `brand.md` |
 | `scripts/render-check.mjs` | Multi-viewport headless Chrome layout & screenshot diagnostic runner |

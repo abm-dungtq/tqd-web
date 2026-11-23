@@ -2,6 +2,22 @@
 
 Mọi thay đổi đáng chú ý của plugin `tqd-web` được ghi ở đây. Định dạng theo [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), phiên bản theo [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [Unreleased]
+
+### Thêm
+
+- `design-intel.mjs --refs <thư mục>` (hoặc `TQD_DESIGN_REFS`): xếp hạng thêm một thư mục DESIGN.md người dùng tự có (ví dụ export Refero Styles) theo thẻ thị giác và 0..n thẻ ngành; thiếu bằng chứng thì gán `unknown`. Thư mục phải nằm ngoài repo; plugin không kèm, không chuyển đổi nội dung bên thứ ba. Module mới `scripts/design-refs.mjs`, quy tắc ở `references/external-design-md.md`.
+- 7 test mới: fallback khi không khớp, và `--refs` trên 5 fixture tự viết (xếp hạng quán cà phê, ẩn dụ một lần không gán ngành, style `unknown` vẫn tìm được qua thẻ thị giác, nhiều ngành, biến môi trường, mã thoát lỗi).
+
+### Sửa
+
+- `design-intel`: truy vấn không khớp từ khoá nào nay trả `"matched": false` kèm ghi chú fallback; `--plan` liệt kê tham khảo thay vì tự chọn hướng. Trước đây điểm cộng bề mặt (+4) làm cảnh báo không bao giờ hiện.
+- `tqd-web-app` Verification Status: SePay/Polar verifier và `checkout-helper.js` có unit test offline; Stripe chỉ có hướng dẫn tham khảo, không có script xác thực đi kèm.
+
+### Ghi chú
+
+- `.gitignore` chặn `refero-styles/` và `design-refs/` để tránh lỡ commit thư viện bên thứ ba.
+
 ## [2.3.0] - 2026-11-23
 
 ### Thêm

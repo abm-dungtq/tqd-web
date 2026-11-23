@@ -8,9 +8,11 @@
  *
  * Cách dùng:
  *   node design-intel.mjs "<ngành + mood>" --surface landing [--json] [--limit 3]
+ *   node design-intel.mjs "<ngành + mood>" --refs <thư mục DESIGN.md ngoài repo>
  */
 
 import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { loadRefs, rankRefs } from './design-refs.mjs';
 
 const DATA_DIR = new URL('../data/', import.meta.url);
 const SURFACES = ['landing', 'menu', 'booking', 'dashboard', 'auth', 'settings'];
@@ -45,10 +47,11 @@ function usage(code) {
     'Tra cứu tri thức thiết kế cho website nhỏ.',
     '',
     'Cách dùng:',
-    '  node design-intel.mjs "<ngành + mood>" [--surface <bề mặt>] [--json] [--limit N] [--plan]',
+    '  node design-intel.mjs "<ngành + mood>" [--surface <bề mặt>] [--json] [--limit N] [--plan] [--refs <thư mục>]',
     '  node design-intel.mjs --check',
     '',
     `Bề mặt: ${SURFACES.join(', ')} (mặc định: landing)`,
+    '--refs (hoặc biến môi trường TQD_DESIGN_REFS): thư mục DESIGN.md bạn tự có quyền dùng, để ngoài repo.',
     'Ví dụ:',
     '  node design-intel.mjs "quán cà phê thủ công" --surface landing',
     '  node design-intel.mjs "dashboard tài chính" --surface dashboard --json',
@@ -181,7 +184,7 @@ function ranked(records, scorer) {
 }
 
 function parseArgs(argv) {
-  const options = { queryParts: [], surface: null, json: false, limit: 3, plan: false, check: false };
+  const options = { queryParts: [], surface: null, json: false, limit: 3, plan: false, check: false, refs: null };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === '--help' || argument === '-h') usage(0);
@@ -190,6 +193,7 @@ function parseArgs(argv) {
     else if (argument === '--limit') options.limit = Number(argv[(index += 1)]);
     else if (argument === '--plan') options.plan = true;
     else if (argument === '--check') options.check = true;
+    else if (argument === '--refs') options.refs = argv[(index += 1)] || '';
     else if (argument.startsWith('--')) fail(`tham số lạ: ${argument}`, 2);
     else options.queryParts.push(argument);
   }
@@ -225,7 +229,7 @@ function planSteps(result, surface, query) {
   const style = result.styles[0];
   const palette = result.palettes[0];
   const pair = result.fonts[0];
-  if (!query) {
+  if (!query || !result.matched) {
     return [
       `Hỏi chủ web ngành hàng và mood bằng lời thường, rồi chạy lại với từ khoá (gợi ý: ${result.styles.map((item) => item.label).join('; ')}).`,
       `Chốt một bảng màu sau khi kiểm tương phản (gợi ý: ${result.palettes.map((item) => item.label).join('; ')}).`,
@@ -250,7 +254,7 @@ function printPlan(result, surface, query) {
   const palette = result.palettes[0];
   const pair = result.fonts[0];
   const lines = [`KẾ HOẠCH THIẾT KẾ · ${surface.label} (Tier ${surface.tier})`];
-  if (query) {
+  if (query && result.matched) {
     lines.push(
       `Yêu cầu: "${query}"`,
       '',
@@ -259,12 +263,15 @@ function printPlan(result, surface, query) {
     );
   } else {
     lines.push(
-      'Yêu cầu: chưa mô tả; dùng gợi ý chung theo bề mặt',
+      query ? `Yêu cầu: "${query}" (không khớp từ khoá; dùng gợi ý chung theo bề mặt)` : 'Yêu cầu: chưa mô tả; dùng gợi ý chung theo bề mặt',
       '',
       `Hướng tham khảo: ${result.styles.map((item) => item.label).join('; ')}`,
       `Bảng màu tham khảo: ${result.palettes.map((item) => item.label).join('; ')}`,
       `Cặp font tham khảo: ${result.fonts.map((item) => `${item.display} + ${item.body}`).join('; ')}`,
     );
+  }
+  if (result.references?.matches.length) {
+    lines.push(`Tham khảo DESIGN.md: ${result.references.matches.map((ref) => ref.name).join('; ')}`);
   }
   lines.push(
     `Mục: ${surface.sections.join(' → ')}`,
@@ -293,6 +300,10 @@ function main() {
   if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > 5) {
     fail('--limit phải là số nguyên từ 1 đến 5', 2);
   }
+  if (options.refs === '') fail('--refs cần đường dẫn thư mục', 2);
+  const refsDir = options.refs ?? process.env.TQD_DESIGN_REFS ?? '';
+  const loadedRefs = refsDir ? loadRefs(refsDir) : null;
+  if (loadedRefs?.error) fail(loadedRefs.error, loadedRefs.code);
 
   const styles = readJson('styles.json').styles;
   const palettes = readJson('palettes.json').palettes;
@@ -304,6 +315,9 @@ function main() {
   const surface = surfaces.find((item) => item.id === options.surface);
   const queryText = normalize(query);
   const queryWords = words(query);
+  const matched = Boolean(query) && [styles, palettes, fonts].some((records) =>
+    records.some((record) => keywordScore(record, queryText, queryWords) > 0),
+  );
 
   const styleRanking = ranked(styles, (style) =>
     keywordScore(style, queryText, queryWords) + (style.surfaces.includes(surface.id) ? 4 : 0),
@@ -321,6 +335,7 @@ function main() {
 
   const result = {
     query,
+    matched,
     surface: {
       id: surface.id,
       label: surface.label,
@@ -336,11 +351,17 @@ function main() {
     palettes: paletteRanking.slice(0, 2).map(({ record }) => record),
     fonts: fontRanking.slice(0, 2).map(({ record }) => record),
     rules: ruleRanking.slice(0, 6).map(({ record }) => record),
-    note:
-      styleRanking[0]?.score === 0
-        ? 'Không khớp từ khoá rõ; đây là gợi ý chung theo bề mặt, cần xác nhận với khách.'
-        : 'Kết quả là gợi ý; màu và font vẫn phải qua kiểm tra tương phản và mắt người.',
+    note: matched
+      ? 'Kết quả là gợi ý; màu và font vẫn phải qua kiểm tra tương phản và mắt người.'
+      : 'Không khớp từ khoá rõ; đây là gợi ý chung theo bề mặt, cần xác nhận với khách.',
   };
+  if (loadedRefs) {
+    result.references = {
+      dir: refsDir,
+      ...rankRefs(loadedRefs.refs, query, options.limit),
+      note: 'Chỉ lấy cảm hứng cấu trúc (thang chữ, nhịp khoảng cách, kỷ luật màu); thay font bằng cặp có subset tiếng Việt, không chép tên, logo, ảnh, copy hay CSS nguyên văn. Xem references/external-design-md.md.',
+    };
+  }
 
   if (options.json) {
     const payload = options.plan ? { ...result, plan: planSteps(result, surface, query) } : result;
@@ -377,7 +398,22 @@ function main() {
     `Phải có: ${surface.mustHave.join('; ')}`,
   ];
   if (surface.permission) lines.push(`Quyền: ${surface.permission}`);
-  lines.push(`Tránh: ${surface.avoid.join('; ')}`, '', result.note);
+  lines.push(`Tránh: ${surface.avoid.join('; ')}`);
+  if (result.references) {
+    const refs = result.references;
+    lines.push('', `THAM KHẢO DESIGN.md NGOÀI (${refs.matches.length}/${refs.total} file; ${refs.withIndustry} file có thẻ ngành)`);
+    if (!refs.matches.length) lines.push('- Không file nào khớp; mô tả thêm ngành hoặc mood (ví dụ: "ấm áp", "tối giản", "nền tối").');
+    for (const ref of refs.matches) {
+      lines.push(
+        `- ${ref.name}: ${ref.tagline || '(không có mô tả)'}`,
+        `  ${ref.theme || '?'} · ${ref.density || '?'} · thị giác: ${ref.visual.join(', ') || '—'} · ngành: ${ref.industries.join(', ')}`,
+        `  màu: ${ref.accents.join(' ') || '—'} · font gốc: ${ref.fonts.join(', ') || '—'}`,
+        `  file: ${ref.file}`,
+      );
+    }
+    lines.push(refs.note);
+  }
+  lines.push('', result.note);
   console.log(lines.join('\n'));
 }
 

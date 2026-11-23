@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -10,6 +11,7 @@ const SKILL_DIR = path.resolve(HERE, '..', '..');
 const REPO_ROOT = path.resolve(SKILL_DIR, '..', '..');
 const DATA_DIR = path.join(SKILL_DIR, 'data');
 const SCRIPT = path.join(SKILL_DIR, 'scripts', 'design-intel.mjs');
+const REFS = path.join(HERE, 'fixtures', 'design-refs');
 
 const VERIFIED_FONTS = new Set([
   'Be Vietnam Pro',
@@ -23,8 +25,9 @@ const VERIFIED_FONTS = new Set([
   'JetBrains Mono',
 ]);
 
-function run(args) {
-  return spawnSync(process.execPath, [SCRIPT, ...args], { encoding: 'utf8' });
+function run(args, env = {}) {
+  const { TQD_DESIGN_REFS, ...base } = process.env;
+  return spawnSync(process.execPath, [SCRIPT, ...args], { encoding: 'utf8', env: { ...base, ...env } });
 }
 
 function readData(name) {
@@ -133,6 +136,7 @@ test('intel: JSON mode exposes stable top-level keys', () => {
   const brief = JSON.parse(result.stdout);
   assert.deepEqual(Object.keys(brief).sort(), [
     'fonts',
+    'matched',
     'note',
     'palettes',
     'query',
@@ -177,5 +181,76 @@ test('intel: help exits 0 and lists every surface', () => {
   assert.equal(result.status, 0);
   for (const surface of ['landing', 'menu', 'booking', 'dashboard', 'auth', 'settings']) {
     assert.match(result.stdout, new RegExp(surface));
+  }
+});
+
+test('intel: unmatched query reports fallback and does not pick a direction', () => {
+  const json = run(['zzqvv', '--json']);
+  assert.equal(json.status, 0, json.stderr);
+  const brief = JSON.parse(json.stdout);
+  assert.equal(brief.matched, false);
+  assert.match(brief.note, /^Không khớp từ khoá rõ/);
+  const plan = run(['zzqvv', '--plan']);
+  assert.equal(plan.status, 0, plan.stderr);
+  assert.match(plan.stdout, /không khớp từ khoá/);
+  assert.match(plan.stdout, /Hướng tham khảo:/);
+  assert.doesNotMatch(plan.stdout, /Chốt hướng/);
+  assert.equal(JSON.parse(run(['quán cà phê', '--json']).stdout).matched, true);
+});
+
+function refsBrief(query, extra = []) {
+  const result = run([query, '--refs', REFS, '--json', ...extra]);
+  assert.equal(result.status, 0, result.stderr);
+  return JSON.parse(result.stdout).references;
+}
+
+// Kỳ vọng dưới đây đã được đọc tay trên 5 fixture tự viết, không lấy từ dữ liệu bên thứ ba.
+test('intel refs: café query ranks the reviewed café reference first', () => {
+  const refs = refsBrief('quán cà phê ấm cúng');
+  assert.equal(refs.total, 5, '_index.md must be skipped');
+  assert.equal(refs.matches[0].name, 'Roastery Counter');
+  assert.ok(refs.matches[0].industries.includes('fnb'));
+  assert.ok(!refs.matches.some((ref) => ref.name === 'Night Ledger'));
+});
+
+test('intel refs: a single metaphorical mention does not assign an industry', () => {
+  const salon = refsBrief('salon làm đẹp').matches.find((ref) => ref.name === 'Ink Salon');
+  assert.deepEqual(salon.industries, ['beauty']);
+});
+
+test('intel refs: styles without industry evidence stay unknown but are found by visual tags', () => {
+  const refs = refsBrief('tối giản nền sáng', ['--limit', '5']);
+  const gallery = refs.matches.find((ref) => ref.name === 'Gallery Objects');
+  assert.ok(gallery, 'visual query must retrieve the untagged gallery style');
+  assert.deepEqual(gallery.industries, ['unknown']);
+  assert.ok(gallery.visual.includes('minimal'));
+  assert.equal(refs.withIndustry, 4);
+});
+
+test('intel refs: one style can carry several industries', () => {
+  const bakery = refsBrief('tiệm bánh').matches[0];
+  assert.equal(bakery.name, 'Corner Bakery');
+  assert.deepEqual(bakery.industries, ['fnb', 'retail']);
+  assert.deepEqual(bakery.accents, ['#fff3c4', '#6b3e1f']);
+  assert.deepEqual(bakery.fonts, ['Lora']);
+});
+
+test('intel refs: TQD_DESIGN_REFS is honoured and absence adds no references key', () => {
+  const viaEnv = JSON.parse(run(['ngân hàng tài chính', '--json'], { TQD_DESIGN_REFS: REFS }).stdout);
+  assert.equal(viaEnv.references.matches[0].name, 'Night Ledger');
+  const without = JSON.parse(run(['ngân hàng tài chính', '--json']).stdout);
+  assert.equal('references' in without, false);
+});
+
+test('intel refs: missing folder exits 2 and a folder without DESIGN.md exits 1', () => {
+  assert.equal(run(['cafe', '--refs', path.join(REFS, 'missing')]).status, 2);
+  assert.equal(run(['cafe', '--refs']).status, 2);
+  const empty = mkdtempSync(path.join(os.tmpdir(), 'tqd-refs-'));
+  try {
+    const result = run(['cafe', '--refs', empty]);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /không có file DESIGN\.md/);
+  } finally {
+    rmSync(empty, { recursive: true, force: true });
   }
 });
