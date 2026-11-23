@@ -405,6 +405,32 @@ test('contract: meta description containing an apostrophe is replaced, not left 
   assert.doesNotMatch(out, /Mô tả cũ/);
 });
 
+test('contract: a non-bakery site gets no bakery copy in generated text', () => {
+  withTempStarter((dir) => {
+    editData(dir, (data) => {
+      data.brandName = 'Tiệm Nail Mây';
+      data.metaTitle = 'Tiệm Nail Mây | Làm móng tại Quận 3';
+      data.metaDescription = 'Làm móng tay, móng chân và chăm sóc da tay tại Quận 3. Mở cửa 09:00 - 20:00 mỗi ngày, đặt lịch trước qua Zalo.';
+      data.hero.eyebrow = 'Tiệm nail tại Quận 3';
+      data.hero.headline = 'Làm móng tay và móng chân theo lịch hẹn';
+      data.hero.subheadline = 'Đặt lịch trước để không phải chờ; dụng cụ khử trùng sau mỗi khách.';
+      data.menuSection.heading = 'Bảng giá dịch vụ';
+      data.offerings = [
+        { title: 'Sơn gel', price: '250.000đ', summary: 'Sơn bền ba tuần, chọn màu tại tiệm.' },
+        { title: 'Chăm sóc da tay', price: '150.000đ', summary: 'Tẩy da chết và dưỡng ẩm.' },
+      ];
+      data.address = '12 Võ Văn Tần, Quận 3, TP.HCM';
+      data.hours = '09:00 - 20:00 mỗi ngày';
+    });
+    const res = run(dir);
+    assert.equal(res.status, 0, res.stdout + res.stderr);
+    for (const name of ['llms.txt', 'llms-full.txt', 'index.html.md']) {
+      const text = read(dir, name);
+      assert.doesNotMatch(text, /bánh|bột|bơ lạt|nướng|mẻ|lò |giao nóng|thợ /i, `${name}:\n${text}`);
+    }
+  });
+});
+
 test('contract: a JSON-LD block that is not an object is a data error, not a crash', () => {
   const html = '<script type="application/ld+json" id="site-jsonld">null</script>';
   assert.throws(

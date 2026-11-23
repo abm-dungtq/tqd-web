@@ -6,16 +6,16 @@
 
 {{brandName}} — {{hero.headline}}. Địa chỉ: {{address}}. Giờ mở cửa: {{hours}}.
 
-## Thực đơn bánh mỗi ngày và giá bán
+## Thực đơn và giá
 
 {{#each offerings}}
 {{@number}}. **{{title}}** ({{price}}): {{summary}}
 {{/each}}
 
-## Thông tin liên hệ và đặt bánh
+## Thông tin liên hệ
 
-- Số điện thoại đặt bánh: {{phoneDisplay}}
-- Nhắn Zalo giữ bánh nóng: {{zaloUrl}}
-- Địa chỉ cửa hàng: {{address}}
-- Giờ bán hàng: {{hours}}
+- Điện thoại: {{phoneDisplay}}
+- Zalo: {{zaloUrl}}
+- Địa chỉ: {{address}}
+- Giờ mở cửa: {{hours}}
 - Trang chủ: {{siteUrl}}/

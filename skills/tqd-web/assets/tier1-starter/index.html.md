@@ -8,7 +8,7 @@ Bánh mì men tự nhiên nướng mới mỗi sáng lúc 6h30. Ủ bột lạnh
 - **Croissant bơ Pháp ít ngọt** (42.000đ / chiếc): 27 lớp bột cán tay cùng bơ Normandy thơm nhẹ, phù hợp ăn sáng.
 - **Hộp trà bánh tiếp khách 6 vị** (210.000đ / hộp): Sáu chiếc bánh ngọt cỡ vừa cắt sẵn, đóng hộp giấy kèm thiệp ghi chú.
 
-## Liên hệ đặt bánh
+## Liên hệ
 
 - Zalo: https://zalo.me/0900000000
 - Điện thoại: 0900 000 000

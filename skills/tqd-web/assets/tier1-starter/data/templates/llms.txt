@@ -7,5 +7,5 @@
 
 ## Trang chính
 
-- [Trang chủ]({{siteUrl}}/): Thực đơn bánh nướng mới mỗi ngày và nút đặt nhanh qua Zalo.
+- [Trang chủ]({{siteUrl}}/): Giới thiệu, bảng giá và nút liên hệ nhanh qua Zalo.
 - [Bản văn bản trang chủ](/index.html.md): Tóm tắt đầy đủ nội dung và bảng giá.

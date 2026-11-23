@@ -25,7 +25,7 @@ Mọi thay đổi đáng chú ý của plugin `tqd-web` được ghi ở đây. 
 - `sync-site-data.mjs` trả mã 2 khi không đọc hoặc ghi được tệp (quyền, thư mục, hết chỗ), tách khỏi mã 1 của dữ liệu lệch; tệp tạm có tên riêng cho từng lần chạy nên hai lần chạy không ghi đè lên nhau.
 - Danh sách có mục lồng cùng loại thẻ không còn bị cắt cụt; mục mẫu thiếu `data-edit-field` hoặc đặt thuộc tính lên thẻ có thẻ con báo lỗi dữ liệu thay vì giữ nguyên trang cũ.
 - Thẻ meta có dấu nháy đơn trong nội dung vẫn được cập nhật khi mô tả đổi.
-- Khuôn `data/templates/llms-full.txt` không còn câu mô tả quy trình và sản phẩm riêng của tiệm bánh mì; mọi câu trong tệp dựng ra đều lấy từ `data/site-data.js`.
+- Khuôn `data/templates/` không còn câu mô tả quy trình, sản phẩm hay tiêu đề riêng của tiệm bánh mì (`Thực đơn bánh mỗi ngày`, `đặt bánh`, `giữ bánh nóng`); mọi câu trong tệp dựng ra đều lấy từ `data/site-data.js` hoặc là nhãn trung tính, nên trang làm móng hay sửa xe không bị lẫn chữ của tiệm bánh.
 - Đường dẫn script trong tài liệu chạy được khi plugin đã cài ở thư mục khác (kể cả đường dẫn có dấu cách); mỗi `SKILL.md` nêu thư mục của skill.
 - Luật `rules/AGENTS.md` được nạp qua từng skill trên Claude Code và chỉ áp cho việc làm web.
 

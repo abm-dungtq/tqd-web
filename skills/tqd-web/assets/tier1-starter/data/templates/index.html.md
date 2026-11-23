@@ -8,7 +8,7 @@
 - **{{title}}** ({{price}}): {{summary}}
 {{/each}}
 
-## Liên hệ đặt bánh
+## Liên hệ
 
 - Zalo: {{zaloUrl}}
 - Điện thoại: {{phoneDisplay}}
