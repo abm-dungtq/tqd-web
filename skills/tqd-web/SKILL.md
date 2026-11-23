@@ -72,7 +72,7 @@ Build the primary Hero and 2–3 signature sections using real copy and `tokens.
 ### Phase 4: Full build and editable content layer
 
 Delegate or build every remaining page in `sitemap.md`:
-- For Tier 1 sites, clone and customize `assets/tier1-starter/` (pre-populated Vietnamese HTML + `data/site-data.js` with `data-edit` attributes for instant `file://` preview) and run `node scripts/sync-site-data.mjs <site-dir>` so static HTML, Open Graph metadata, JSON-LD, and `llms.txt` match `data/site-data.js`.
+- For Tier 1 sites, clone and customize `assets/tier1-starter/` (pre-populated Vietnamese HTML + `data/site-data.js` with `data-edit` attributes for instant `file://` preview) and run `node scripts/sync-site-data.mjs <site-dir>` so static HTML, Open Graph metadata, JSON-LD, `llms.txt`, `robots.txt`, and `sitemap.xml` match `data/site-data.js`. Binding conventions: `data-edit` / `data-edit-tel` / `data-edit-href` for single values, `data-edit-list` + `data-edit-item` + `data-edit-field` inside a `<!-- list:KEY -->` … `<!-- /list:KEY -->` region (the first item is the template), `data-edit-template="fixed text {{key}}"` for mixed text, and `data/templates/<file>` models (`{{key}}`, `{{#each key}}`) for derived text files. Never type a phone number, Zalo link, address, opening hours, or domain directly into HTML or text files; bind it, or the sync run fails. Bind the brand name wherever it is visible text or a page title; if it must appear inside an attribute (alt, secondary-page meta), update that place by hand when the brand is renamed. A 2.1 site must first convert `data/site-data.js` to double-quoted JSON, split `scripts/hydrate.js` out, and create the `data/templates/` models before syncing.
 - Attach zero-server customer contact channels (Zalo, click-to-call, static lead form via `tqd-web-launch`), and generate `HUONG-DAN-SUA-WEB.md` from `references/edit-guide-template.md` so the owner knows exactly where to edit words, prices, photos, and phone numbers.
 
 ### Phase 5: Health audit and isolated visual review
@@ -89,8 +89,8 @@ Pause and ask the owner before buying a domain or paid plan, changing live DNS, 
 
 ## References and Assets
 
-- `assets/tier1-starter/` — ready-to-customize Tier 1 Vietnamese HTML5 starter with `styles/tokens.css`, `styles/site.css`, `data/site-data.js` (`data-edit`), `404.html`, `robots.txt`, `sitemap.xml`, `llms.txt`, `llms-full.txt`, and `index.html.md`
-- `scripts/sync-site-data.mjs` — Node.js (`>= 20`, macOS/Linux/Windows) sandboxed tool syncing `data/site-data.js` back into static HTML, Open Graph, JSON-LD, and `llms.txt` (`scripts/tests/sync-site-data.test.mjs`)
+- `assets/tier1-starter/` — ready-to-customize Tier 1 Vietnamese HTML5 starter with `styles/tokens.css`, `styles/site.css`, `data/site-data.js` (JSON + `data-edit*` bindings), `assets/tier1-starter/scripts/hydrate.js` (updates the page over `file://`), `data/templates/` (models for `llms.txt`, `llms-full.txt`, `index.html.md`), `404.html`, `robots.txt`, and `sitemap.xml`
+- `scripts/sync-site-data.mjs` — Node.js (`>= 20`, macOS/Linux/Windows) tool that reads `data/site-data.js` as JSON (never executes it) and rebuilds every root `*.html`, `robots.txt`, `sitemap.xml`, and every file modelled in `data/templates/`; `--dry-run` previews, `--check` reports drift and contact values typed outside a binding (`scripts/tests/sync-site-data.test.mjs`)
 - `references/discovery-questions-vn.md` — 4 conversational Vietnamese discovery prompts and brief template
 - `references/stack-tiers-and-content-separation.md` — silent Tier 1/2/3 decision rules and `content/` separation patterns
 - `references/edit-guide-template.md` — plain-language `HUONG-DAN-SUA-WEB.md` blueprint for non-technical owners

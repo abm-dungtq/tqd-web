@@ -1,6 +1,6 @@
 # Tiệm Bánh An Lành
 
-Bánh mì men tự nhiên nướng mới mỗi sáng lúc 6h30 tại Hải Châu, Đà Nẵng.
+Bánh mì men tự nhiên nướng mới mỗi sáng lúc 6h30. Ủ bột lạnh 18 giờ từ bột mì nguyên cám và bơ lạt, vỏ giòn mỏng, ruột mềm nhẹ bụng và giao nóng trong 45 phút nội thành.
 
 ## Ba dòng bánh ra lò đều mỗi ngày
 

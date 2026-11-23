@@ -1,0 +1,11 @@
+# {{brandName}}
+
+> {{metaDescription}}
+
+- Liên hệ: {{phoneDisplay}} · {{zaloUrl}}
+- Địa chỉ: {{address}} ({{hours}})
+
+## Trang chính
+
+- [Trang chủ]({{siteUrl}}/): Thực đơn bánh nướng mới mỗi ngày và nút đặt nhanh qua Zalo.
+- [Bản văn bản trang chủ](/index.html.md): Tóm tắt đầy đủ nội dung và bảng giá.

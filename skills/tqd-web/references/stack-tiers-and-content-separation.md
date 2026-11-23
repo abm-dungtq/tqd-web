@@ -18,8 +18,8 @@ Dù chạy Tier 1 hay Tier 2, dữ liệu kinh doanh hay thay đổi không đư
 1. Tách màu sắc, cỡ chữ và khoảng cách vào `styles/tokens.css` (giữ luật bố cục riêng trong `styles/site.css` để cập nhật bảng màu không làm mất khung).
 2. Dùng bộ khung `assets/tier1-starter/` làm nền tảng chuẩn:
    - Văn bản thật nằm sẵn trong `index.html` để Google và xem trước Zalo/Facebook đọc trọn vẹn 100% không cần JavaScript.
-   - Đồng thời gắn thuộc tính `data-edit`, `data-edit-tel`, `data-edit-href` nối với `window.SITE_DATA` trong `data/site-data.js` để chủ web bấm đúp mở `index.html` trên máy (`file://`) là thấy ngay nội dung vừa sửa mà không dính lỗi CORS của `fetch('data.json')`.
-   - Chạy `node scripts/sync-site-data.mjs <thu-muc-web>` sau khi chỉnh `data/site-data.js` để đồng bộ ngược lại vào `<title>`, thẻ Open Graph, HTML tĩnh, JSON-LD và `llms.txt` trước khi xuất bản.
+   - Đồng thời gắn thuộc tính `data-edit`, `data-edit-tel`, `data-edit-href` nối với `window.SITE_DATA` trong `data/site-data.js` để chủ web bấm đúp mở `index.html` trên máy (`file://`) là thấy ngay nội dung vừa sửa mà không dính lỗi CORS của `fetch('data.json')`; danh sách dùng `data-edit-list` / `data-edit-item` / `data-edit-field`, câu trộn chữ cố định với dữ liệu dùng `data-edit-template="chữ {{khóa}}"`.
+   - Chạy `node scripts/sync-site-data.mjs <thu-muc-web>` sau khi chỉnh `data/site-data.js` để dựng lại mọi tệp gốc (`*.html`, `robots.txt`, `sitemap.xml`) và mọi tệp văn bản phái sinh có khuôn trong `data/templates/`; thêm `--check` để biết trang có lệch dữ liệu hay còn giá trị liên hệ gõ cứng, `--dry-run` để xem trước.
 
 ### Với Tier 2 (Astro / Next.js)
 1. Cấu trúc chuẩn thư mục dễ hiểu:

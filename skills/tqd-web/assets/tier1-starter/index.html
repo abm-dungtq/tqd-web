@@ -13,7 +13,7 @@
   <meta property="og:title" content="Tiệm Bánh An Lành | Bánh mì men tự nhiên nướng mới mỗi sáng">
   <meta property="og:description" content="Bánh mì sourdough lên men 18 giờ và bánh ngọt ít ngọt nướng mới lúc 6h30 mỗi ngày tại Hải Châu, Đà Nẵng. Đặt bánh nhanh qua Zalo hoặc gọi trực tiếp.">
   <meta property="og:image" content="https://tiembanh-anlanh.vn/images/hero-bakery.svg">
-  <meta property="og:image:alt" content="Ổ bánh mì nướng thủ công nóng giòn tại Tiệm Bánh An Lành">
+  <meta property="og:image:alt" content="Ổ bánh mì nướng thủ công nóng giòn">
   <meta name="twitter:card" content="summary_large_image">
   <!-- Khi xuất bản thực tế, có thể gắn link Google Fonts cho "Lora" và "Be Vietnam Pro" tại đây -->
   <link rel="stylesheet" href="styles/tokens.css">
@@ -57,11 +57,11 @@
         <p class="hero__lead" data-edit="hero.subheadline">Ủ bột lạnh 18 giờ từ bột mì nguyên cám và bơ lạt, vỏ giòn mỏng, ruột mềm nhẹ bụng và giao nóng trong 45 phút nội thành.</p>
         <div class="cta-row">
           <a class="btn btn--primary" href="https://zalo.me/0905842619" data-edit-href="zaloUrl" data-edit="hero.primaryCta">Nhắn Zalo đặt bánh</a>
-          <a class="btn btn--secondary" href="tel:0905842619" data-edit-tel="phoneTel" data-edit="hero.secondaryCta">Gọi 0905 842 619</a>
+          <a class="btn btn--secondary" href="tel:0905842619" data-edit-tel="phoneTel">Gọi <span data-edit="phoneDisplay">0905 842 619</span></a>
         </div>
       </div>
       <figure class="hero__media">
-        <img src="images/hero-bakery.svg" width="560" height="400" alt="Ổ bánh mì nướng thủ công nóng giòn vừa ra lò tại Tiệm Bánh An Lành">
+        <img src="images/hero-bakery.svg" width="560" height="400" alt="Ổ bánh mì nướng thủ công nóng giòn vừa ra lò">
       </figure>
     </section>
 
@@ -70,22 +70,24 @@
         <h2 data-edit="menuSection.heading">Ba dòng bánh ra lò đều mỗi ngày</h2>
         <p data-edit="menuSection.summary">Mẻ sáng ra lò lúc 6h30 và mẻ chiều lúc 15h00 để bánh luôn giữ độ giòn tự nhiên khi đến tay bạn.</p>
       </div>
-      <div class="offerings">
-        <article class="card">
-          <h3 data-edit="offerings.0.title">Bánh mì Sourdough nguyên cám</h3>
-          <p data-edit="offerings.0.summary">Ổ tròn 550g ủ men chua tự nhiên 18 giờ, không phụ gia giữ ẩm.</p>
-          <p class="card__price" data-edit="offerings.0.price">75.000đ / ổ</p>
+      <div class="offerings" data-edit-list="offerings">
+        <!-- list:offerings -->
+        <article class="card" data-edit-item>
+          <h3 data-edit-field="title">Bánh mì Sourdough nguyên cám</h3>
+          <p data-edit-field="summary">Ổ tròn 550g ủ men chua tự nhiên 18 giờ, không phụ gia giữ ẩm.</p>
+          <p class="card__price" data-edit-field="price">75.000đ / ổ</p>
         </article>
-        <article class="card">
-          <h3 data-edit="offerings.1.title">Croissant bơ Pháp ít ngọt</h3>
-          <p data-edit="offerings.1.summary">27 lớp bột cán tay cùng bơ Normandy thơm nhẹ, phù hợp ăn sáng.</p>
-          <p class="card__price" data-edit="offerings.1.price">42.000đ / chiếc</p>
+        <article class="card" data-edit-item>
+          <h3 data-edit-field="title">Croissant bơ Pháp ít ngọt</h3>
+          <p data-edit-field="summary">27 lớp bột cán tay cùng bơ Normandy thơm nhẹ, phù hợp ăn sáng.</p>
+          <p class="card__price" data-edit-field="price">42.000đ / chiếc</p>
         </article>
-        <article class="card">
-          <h3 data-edit="offerings.2.title">Hộp trà bánh tiếp khách 6 vị</h3>
-          <p data-edit="offerings.2.summary">Sáu chiếc bánh ngọt cỡ vừa cắt sẵn, đóng hộp giấy kèm thiệp ghi chú.</p>
-          <p class="card__price" data-edit="offerings.2.price">210.000đ / hộp</p>
+        <article class="card" data-edit-item>
+          <h3 data-edit-field="title">Hộp trà bánh tiếp khách 6 vị</h3>
+          <p data-edit-field="summary">Sáu chiếc bánh ngọt cỡ vừa cắt sẵn, đóng hộp giấy kèm thiệp ghi chú.</p>
+          <p class="card__price" data-edit-field="price">210.000đ / hộp</p>
         </article>
+        <!-- /list:offerings -->
       </div>
     </section>
 
@@ -112,5 +114,6 @@
   </footer>
 
   <script src="data/site-data.js" defer></script>
+  <script src="scripts/hydrate.js" defer></script>
 </body>
 </html>
