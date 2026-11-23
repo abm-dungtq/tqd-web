@@ -22,7 +22,7 @@ Mọi thay đổi đáng chú ý của plugin `tqd-web` được ghi ở đây. 
 - Sync dựng lại mọi tệp gốc: `*.html`, `robots.txt`, `sitemap.xml`, `llms*.txt`, `*.html.md`; mỗi tệp tự suy tên miền của nó nên một tệp còn bản cũ vẫn được sửa đúng ở lần chạy sau.
 - Thêm/bớt mục trong danh sách và dấu nháy đơn trong chữ không còn làm hỏng trang.
 - Audit và preflight chặn khung starter chưa sửa hoặc sửa nửa chừng: tên tiệm, địa chỉ, số điện thoại mẫu, tên miền `.example` / `.test` / `.invalid`, kể cả khi chỉ còn trong `<title>`, `robots.txt`, `sitemap.xml` hay tệp văn bản.
-- `sync-site-data.mjs` trả mã 2 khi không đọc hoặc ghi được tệp (quyền, thư mục, hết chỗ), tách khỏi mã 1 của dữ liệu lệch; tệp tạm có tên riêng cho từng lần chạy và được dọn khi ghi hỏng.
+- `sync-site-data.mjs` trả mã 2 khi không đọc hoặc ghi được tệp (quyền, thư mục, hết chỗ), tách khỏi mã 1 của dữ liệu lệch; tệp tạm có tên riêng cho từng lần chạy nên hai lần chạy không ghi đè lên nhau.
 - Danh sách có mục lồng cùng loại thẻ không còn bị cắt cụt; mục mẫu thiếu `data-edit-field` hoặc đặt thuộc tính lên thẻ có thẻ con báo lỗi dữ liệu thay vì giữ nguyên trang cũ.
 - Thẻ meta có dấu nháy đơn trong nội dung vẫn được cập nhật khi mô tả đổi.
 - Khuôn `data/templates/llms-full.txt` không còn câu mô tả quy trình và sản phẩm riêng của tiệm bánh mì; mọi câu trong tệp dựng ra đều lấy từ `data/site-data.js`.

@@ -354,7 +354,7 @@ test('contract: nested markup inside a list item survives rendering', () => {
     '  <!-- list:offerings -->',
     '  <div class="card" data-edit-item>',
     '    <h3 data-edit-field="title">Mẫu</h3>',
-    '    <div class="row"><p data-edit-field="summary">Mẫu</p></div>',
+    '    <div class="row"><p DATA-EDIT-FIELD="summary">Mẫu</p></div>',
     '  </div>',
     '  <!-- /list:offerings -->',
     '</div>',
@@ -362,10 +362,28 @@ test('contract: nested markup inside a list item survives rendering', () => {
   const out = syncHtmlWithSiteData(html, {
     offerings: [{ title: 'Bánh mì', summary: 'Giòn' }, { title: 'Bánh ngọt', summary: 'Ít đường' }],
   });
+  assert.equal(count(out, /<div\b/g), count(out, /<\/div>/g), out);
   assert.equal(count(out, /data-edit-item/g), 2);
   assert.equal(count(out, /<div class="row">/g), 2);
-  assert.match(out, /<h3 data-edit-field="title">Bánh mì<\/h3>/);
-  assert.match(out, /<p data-edit-field="summary">Ít đường<\/p>/);
+  assert.match(out, /<h3 data-edit-field="title">Bánh mì<\/h3>\n    <div class="row"><p DATA-EDIT-FIELD="summary">Giòn<\/p><\/div>\n  <\/div>/);
+  assert.match(out, /<p DATA-EDIT-FIELD="summary">Ít đường<\/p>/);
+  assert.ok(out.endsWith('  <!-- /list:offerings -->\n</div>'), out);
+});
+
+test('contract: a quoted ">" inside an item attribute does not end the item', () => {
+  const html = [
+    '<!-- list:items -->',
+    '<div data-edit-item><p data-edit-field="title">old</p><div title="> </div>">inside</div></div>',
+    '<!-- /list:items -->',
+  ].join('\n');
+  const out = syncHtmlWithSiteData(html, { items: [{ title: 'new' }] });
+  assert.match(out, /<p data-edit-field="title">new<\/p>/);
+  assert.match(out, /<div title="> <\/div>">inside<\/div><\/div>/);
+});
+
+test('contract: a list without its closing comment is a data error', () => {
+  const html = '<!-- list:items --><div data-edit-item><p data-edit-field="title">old</p></div>';
+  assert.throws(() => syncHtmlWithSiteData(html, { items: [{ title: 'new' }] }), /thiếu chú thích đóng/);
 });
 
 test('contract: a list field wrapped in another element is a data error', () => {
@@ -381,10 +399,18 @@ test('contract: a list field wrapped in another element is a data error', () => 
 });
 
 test('contract: meta description containing an apostrophe is replaced, not left stale', () => {
-  const html = '<html><head><meta name="description" content="Mô tả cũ"></head><body></body></html>';
+  const html = '<html><head><meta name="description" content="Mô tả cũ của L\'an"></head><body></body></html>';
   const out = syncHtmlWithSiteData(html, { metaDescription: "Bánh của L'an" });
   assert.match(out, /<meta name="description" content="Bánh của L&#39;an">/);
   assert.doesNotMatch(out, /Mô tả cũ/);
+});
+
+test('contract: a JSON-LD block that is not an object is a data error, not a crash', () => {
+  const html = '<script type="application/ld+json" id="site-jsonld">null</script>';
+  assert.throws(
+    () => syncHtmlWithSiteData(html, { brandName: 'Tiệm Mới' }),
+    (err) => err.code === 'EDATA' && /JSON-LD/.test(err.message)
+  );
 });
 
 test('contract: an unreadable data file exits 2, not the drift code 1', () => {

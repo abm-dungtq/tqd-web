@@ -154,14 +154,14 @@ function replaceMetaContent(html, attrName, attrValue, newContent) {
   if (typeof newContent !== 'string' || !newContent.trim()) return html;
   const escaped = escapeHtmlAttr(newContent);
   const re = new RegExp(
-    `(<meta\\b[^>]*\\b${attrName}\\s*=\\s*["']${escapeRegExp(attrValue)}["'][^>]*\\bcontent\\s*=\\s*)(["'])(.*?)\\2([^>]*>)`,
+    `(<meta\\b[^>]*\\b${attrName}\\s*=\\s*["']${escapeRegExp(attrValue)}["'][^>]*\\bcontent\\s*=\\s*)(["'])([^>]*?)\\2([^>]*>)`,
     'i'
   );
   if (re.test(html)) {
     return html.replace(re, (_, prefix, quote, _old, suffix) => `${prefix}${quote}${escaped}${quote}${suffix}`);
   }
   const revRe = new RegExp(
-    `(<meta\\b[^>]*\\bcontent\\s*=\\s*)(["'])(.*?)\\2([^>]*\\b${attrName}\\s*=\\s*["']${escapeRegExp(attrValue)}["'][^>]*>)`,
+    `(<meta\\b[^>]*\\bcontent\\s*=\\s*)(["'])([^>]*?)\\2([^>]*\\b${attrName}\\s*=\\s*["']${escapeRegExp(attrValue)}["'][^>]*>)`,
     'i'
   );
   return html.replace(revRe, (_, prefix, quote, _old, suffix) => `${prefix}${quote}${escaped}${quote}${suffix}`);
@@ -194,6 +194,9 @@ function updateJsonLdBlock(html, data) {
         parsed = JSON.parse(rawBody);
       } catch {
         return full;
+      }
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        throw dataError('Khối JSON-LD #site-jsonld phải là một đối tượng JSON, không phải mảng hay giá trị rỗng.');
       }
       if (typeof data.brandName === 'string' && data.brandName.trim()) parsed.name = data.brandName;
       if (typeof data.metaDescription === 'string' && data.metaDescription.trim()) parsed.description = data.metaDescription;
@@ -238,27 +241,147 @@ function renderInline(template, data, item, label) {
  * Re-render every `<!-- list:KEY -->` … `<!-- /list:KEY -->` region from the array at KEY.
  * The first `data-edit-item` element is the template for all entries.
  */
-function findElementEnd(html, startIndex, tagName) {
-  const tag = escapeRegExp(tagName);
-  const re = new RegExp(`<!--[\\s\\S]*?-->|</${tag}\\s*>|<${tag}(\\s[^>]*)?>`, 'gi');
-  re.lastIndex = startIndex;
-  let depth = 0;
-  for (let m; (m = re.exec(html)); ) {
-    const token = m[0];
-    if (token.startsWith('<!--')) continue;
-    if (token.startsWith('</')) {
-      depth -= 1;
-      if (depth === 0) return re.lastIndex;
-    } else if (/\/\s*$/.test(m[1] ?? '')) {
-      if (depth === 0) return re.lastIndex;
-    } else {
-      depth += 1;
+const TAG_HEAD_RE = /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)/y;
+
+/** One tag or comment starting at `index`, with quote-aware end; `null` for anything else. */
+function readTagAt(html, index) {
+  if (html.startsWith('<!--', index)) {
+    const end = html.indexOf('-->', index + 4);
+    return end === -1 ? null : { start: index, end: end + 3, comment: true };
+  }
+  TAG_HEAD_RE.lastIndex = index;
+  const head = TAG_HEAD_RE.exec(html);
+  if (!head) return null;
+  let i = TAG_HEAD_RE.lastIndex;
+  let quote = null;
+  for (; i < html.length; i += 1) {
+    const ch = html[i];
+    if (quote) {
+      if (ch === quote) quote = null;
+    } else if (ch === '"' || ch === "'") {
+      quote = ch;
+    } else if (ch === '>') {
+      break;
     }
+  }
+  if (i >= html.length) return null;
+  const inner = html.slice(TAG_HEAD_RE.lastIndex, i);
+  return {
+    start: index,
+    end: i + 1,
+    name: head[2],
+    closing: head[1] === '/',
+    selfClosing: /\/\s*$/.test(inner),
+    attrs: inner,
+  };
+}
+
+function findElementEnd(html, startIndex, tagName) {
+  let depth = 0;
+  let i = startIndex;
+  while (i < html.length) {
+    const tag = readTagAt(html, i);
+    if (!tag) {
+      i += 1;
+      continue;
+    }
+    if (!tag.comment && tag.name.toLowerCase() === tagName.toLowerCase()) {
+      if (tag.closing) {
+        depth -= 1;
+        if (depth === 0) return tag.end;
+      } else if (!tag.selfClosing) {
+        depth += 1;
+      } else if (depth === 0) {
+        return tag.end;
+      }
+    }
+    i = tag.end;
   }
   return -1;
 }
 
+function findItemTag(html, from) {
+  let i = from;
+  while (i < html.length) {
+    const tag = readTagAt(html, i);
+    if (!tag) {
+      i += 1;
+      continue;
+    }
+    if (!tag.comment && !tag.closing && /\bdata-edit-item\b/i.test(tag.attrs)) return tag;
+    i = tag.end;
+  }
+  return null;
+}
+
+/** Every `data-edit-field` element in the item template, as a leaf with a text body. */
+function findFieldElements(template) {
+  const fields = [];
+  let i = 0;
+  while (i < template.length) {
+    const tag = readTagAt(template, i);
+    if (!tag) {
+      i += 1;
+      continue;
+    }
+    if (tag.comment) {
+      i = tag.end;
+      continue;
+    }
+    const attr = !tag.closing && /\bdata-edit-field\s*=\s*(["'])([^"']+)\1/i.exec(tag.attrs);
+    if (!attr) {
+      i = tag.end;
+      continue;
+    }
+    let close = null;
+    let j = tag.end;
+    while (j < template.length) {
+      const next = readTagAt(template, j);
+      if (!next) {
+        j += 1;
+        continue;
+      }
+      if (next.comment) {
+        j = next.end;
+        continue;
+      }
+      if (next.closing) {
+        if (next.name.toLowerCase() !== tag.name.toLowerCase()) {
+          throw dataError(`Thẻ <${tag.name} data-edit-field="${attr[2]}"> mở trước khi đóng <${next.name}>.`);
+        }
+        close = next;
+        break;
+      }
+      throw dataError(`Thẻ <${tag.name} data-edit-field="${attr[2]}"> có thẻ con; mỗi trường phải là một thẻ chứa chữ thuần.`);
+    }
+    if (!close) throw dataError(`Thẻ <${tag.name} data-edit-field="${attr[2]}"> thiếu thẻ đóng </${tag.name}>.`);
+    fields.push({ contentStart: tag.end, contentEnd: close.start, field: attr[2] });
+    i = close.end;
+  }
+  return fields;
+}
+
+function assertListMarkers(html) {
+  const opened = [];
+  for (const match of html.matchAll(/<!--\s*(\/?)list:([\w.]+)\s*-->/g)) {
+    if (!match[1]) {
+      opened.push(match[2]);
+    } else if (opened.pop() !== match[2]) {
+      throw dataError(`Chú thích <!-- /list:${match[2]} --> không khớp với danh sách đang mở.`);
+    }
+  }
+  if (opened.length) {
+    throw dataError(`Danh sách "${opened[0]}" thiếu chú thích đóng <!-- /list:${opened[0]} -->.`);
+  }
+  for (const match of html.matchAll(/\bdata-edit-list\s*=\s*(["'])([\w.]+)\1/g)) {
+    if (!new RegExp(`<!--\\s*list:${escapeRegExp(match[2])}\\s*-->`).test(html)) {
+      throw dataError(`Thẻ có data-edit-list="${match[2]}" nhưng thiếu chú thích <!-- list:${match[2]} -->.`);
+    }
+  }
+}
+
 function renderLists(html, data) {
+  assertListMarkers(html);
   return html.replace(
     /(<!--\s*list:([\w.]+)\s*-->)([\s\S]*?)(<!--\s*\/list:\2\s*-->)/g,
     (full, open, key, body, close) => {
@@ -266,41 +389,38 @@ function renderLists(html, data) {
       if (!Array.isArray(entries)) return full;
       if (entries.length === 0) throw dataError(`Danh sách "${key}" phải còn ít nhất 1 mục.`);
 
-      const first = /([ \t]*)<([a-zA-Z0-9-]+)\b[^>]*\bdata-edit-item\b[^>]*>/i.exec(body);
-      if (!first) {
+      const itemTag = findItemTag(body, 0);
+      if (!itemTag) {
         throw dataError(`Danh sách "${key}" thiếu mục mẫu: mục đầu tiên cần thuộc tính data-edit-item.`);
       }
-      const [, indent, tagName] = first;
-      const itemEnd = findElementEnd(body, first.index + indent.length, tagName);
+      const itemEnd = findElementEnd(body, itemTag.start, itemTag.name);
       if (itemEnd === -1) {
-        throw dataError(`Mục đầu của danh sách "${key}" thiếu thẻ đóng </${tagName}>.`);
+        throw dataError(`Mục đầu của danh sách "${key}" thiếu thẻ đóng </${itemTag.name}>.`);
       }
 
-      const itemTemplate = body.slice(first.index + indent.length, itemEnd);
-      const lead = body.slice(0, first.index);
+      const lineStart = body.lastIndexOf('\n', itemTag.start - 1) + 1;
+      const before = body.slice(lineStart, itemTag.start);
+      const indent = /^[ \t]*$/.test(before) ? before : '';
+      const itemTemplate = body.slice(itemTag.start, itemEnd);
+      const lead = body.slice(0, itemTag.start - indent.length);
       const tail = /\s*$/.exec(body)[0];
 
-      const fieldRe = /<([a-zA-Z0-9-]+)([^>]*\bdata-edit-field\s*=\s*(["'])([^"']+)\3[^>]*)>[^<]*<\/\1>/gi;
-      const declared = (itemTemplate.match(/\bdata-edit-field\s*=/g) ?? []).length;
-      let matched = 0;
-      itemTemplate.replace(fieldRe, () => {
-        matched += 1;
-        return '';
-      });
-      if (declared === 0) {
+      const fields = findFieldElements(itemTemplate);
+      if (fields.length === 0) {
         throw dataError(`Mục mẫu của danh sách "${key}" thiếu data-edit-field, không có dòng nào để điền.`);
       }
-      if (matched !== declared) {
-        throw dataError(`Mục mẫu của danh sách "${key}" có data-edit-field bọc thẻ con hoặc không có thẻ bao; mỗi trường phải là một thẻ chứa chữ thuần.`);
-      }
 
-      const items = entries.map((entry, i) => itemTemplate.replace(fieldRe, (_, tag, attrs, _q, field) => {
-        const value = entry == null ? undefined : entry[field];
-        if (typeof value !== 'string') {
-          throw dataError(`Mục thứ ${i + 1} của "${key}" thiếu dòng "${field}". Mỗi mục cần đủ các dòng như mục đầu tiên.`);
+      const items = entries.map((entry, i) => {
+        let item = itemTemplate;
+        for (const field of [...fields].reverse()) {
+          const value = entry == null ? undefined : entry[field.field];
+          if (typeof value !== 'string') {
+            throw dataError(`Mục thứ ${i + 1} của "${key}" thiếu dòng "${field.field}". Mỗi mục cần đủ các dòng như mục đầu tiên.`);
+          }
+          item = item.slice(0, field.contentStart) + escapeHtmlText(value) + item.slice(field.contentEnd);
         }
-        return `<${tag}${attrs}>${escapeHtmlText(value)}</${tag}>`;
-      }));
+        return item;
+      });
       return `${open}${lead}${indent}${items.join(`\n${indent}`)}${tail}${close}`;
     }
   );
@@ -357,7 +477,7 @@ export function syncHtmlWithSiteData(html, data, { head = true } = {}) {
 
   // Update inner text of leaf elements with data-edit-template="fixed text {{key}}"
   out = out.replace(
-    /<([a-zA-Z0-9-]+)([^>]*\bdata-edit-template\s*=\s*(["'])([^"']*)\3[^>]*)>([^<]*)<\/\1>/gi,
+    /<([a-zA-Z0-9-]+)([^>]*\bdata-edit-template\s*=\s*(["'])([^>]*?)\3[^>]*)>([^<]*)<\/\1>/gi,
     (_, tagName, attrs, _q, template) => {
       const text = renderInline(unescapeHtmlAttr(template), data, null, 'data-edit-template');
       return `<${tagName}${attrs}>${escapeHtmlText(text)}</${tagName}>`;
