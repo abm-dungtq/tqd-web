@@ -36,6 +36,7 @@ node "${CLAUDE_SKILL_DIR}/scripts/design-refs-tag.mjs" "/đường/dẫn/ngoài/
   - Chỉ gửi tên, câu tóm tắt, đoạn mô tả và `## Imagery` (≤ 2.000 ký tự/file); không gửi token, CSS hay HTML mẫu.
   - **Chỉ bật khi người giữ file đã xác nhận được phép gửi nội dung cho bên thứ ba.** Có phí theo token của TypeSafe.
   - File gọi lỗi giữ thẻ offline kèm `jevError`; script vẫn ghi kết quả và thoát mã 1.
+  - Chạy lại (offline hay `--jev`) giữ nguyên kết quả Jev cũ nếu phần mô tả của file không đổi (so bằng `hash`); `--jev` chỉ gửi file mới, file đã sửa mô tả và file lỗi lần trước. `local-tags.json` hỏng thì script dừng (mã 1), không ghi đè. File được ghi tạm rồi đổi tên nên ngắt giữa chừng không làm hỏng bản cũ.
   - Đường gọi Jev chỉ được test với server giả trong repo; chưa kiểm chứng với API thật.
 
 ## Chuyển thành thiết kế của khách

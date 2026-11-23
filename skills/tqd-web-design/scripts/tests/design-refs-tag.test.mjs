@@ -68,8 +68,9 @@ test('refs-tag: offline run writes local-tags.json without any network call', as
     });
     const tags = readTags(dir);
     assert.equal(Object.keys(tags.files).length, 5, '_index.md must be skipped');
-    assert.deepEqual(tags.files['corner-bakery.md'].industries, ['fnb', 'retail']);
-    assert.deepEqual(tags.files['gallery-objects.md'], { industries: ['unknown'], visual: ['dark', 'light', 'minimal'], source: 'offline' });
+    const { hash, ...gallery } = tags.files['gallery-objects.md'];
+    assert.match(hash, /^[0-9a-f]{16}$/);
+    assert.deepEqual(gallery, { industries: ['unknown'], visual: ['dark', 'light', 'minimal'], source: 'offline' });
     assert.equal(tags.counts.unknown, 1);
   } finally {
     rmSync(dir, { recursive: true, force: true });
@@ -114,6 +115,54 @@ test('refs-tag: --jev sends only unknown files, only their description, and feed
     const ref = refs.matches.find((match) => match.name === 'Gallery Objects');
     assert.deepEqual(ref.industries, ['retail', 'creative']);
     assert.equal(ref.tagSource, 'jev');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('refs-tag: reruns keep paid Jev results, resend only changed or failed files', async () => {
+  const dir = copyFixtures();
+  const env = (endpoint) => ({ TQD_JEV_ENDPOINT: endpoint, TYPESAFE_API_KEY: 'k' });
+  try {
+    await withJevMock((id) => (id === 'retail' ? 0.9 : 0.1), async (endpoint, requests) => {
+      assert.equal((await run(TAGGER, [dir, '--jev'], env(endpoint))).status, 0);
+      assert.equal(requests.length, 1);
+
+      const offline = await run(TAGGER, [dir], env(endpoint));
+      assert.equal(offline.status, 0, offline.stderr);
+      assert.match(offline.stdout, /giữ lại 1 kết quả Jev cũ/);
+      assert.deepEqual(readTags(dir).files['gallery-objects.md'].industries, ['retail']);
+
+      assert.equal((await run(TAGGER, [dir, '--jev'], env(endpoint))).status, 0);
+      assert.equal(requests.length, 1, 'an unchanged Jev result is never re-sent');
+
+      const file = path.join(dir, 'gallery-objects.md');
+      writeFileSync(file, readFileSync(file, 'utf8').replace('No people', 'Still no people'));
+      assert.equal((await run(TAGGER, [dir, '--jev'], env(endpoint))).status, 0);
+      assert.equal(requests.length, 2, 'an edited description is re-classified');
+    });
+
+    const file = path.join(dir, 'gallery-objects.md');
+    writeFileSync(file, readFileSync(file, 'utf8').replace('Still no people', 'No people at all'));
+    assert.equal((await run(TAGGER, [dir, '--jev'], env('http://127.0.0.1:9/closed'))).status, 1);
+    assert.ok(readTags(dir).files['gallery-objects.md'].jevError);
+    await withJevMock(() => 0.9, async (endpoint, requests) => {
+      assert.equal((await run(TAGGER, [dir, '--jev'], env(endpoint))).status, 0);
+      assert.equal(requests.length, 1, 'a failed file is retried');
+    });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('refs-tag: a corrupt local-tags.json is never overwritten', async () => {
+  const dir = copyFixtures();
+  try {
+    const tagsFile = path.join(dir, 'local-tags.json');
+    writeFileSync(tagsFile, '{ not json');
+    const result = await run(TAGGER, [dir]);
+    assert.equal(result.status, 1);
+    assert.equal(readFileSync(tagsFile, 'utf8'), '{ not json');
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

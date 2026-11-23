@@ -8,7 +8,8 @@
  * nhận được phép gửi nội dung đó cho bên thứ ba.
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { INDUSTRIES, TAGS_FILE, describingExcerpt, loadRefs } from './design-refs.mjs';
 
@@ -91,20 +92,23 @@ async function askJev(apiKey, state) {
   return scores;
 }
 
-async function tagWithJev(refs, files, options) {
+function jevIndustries(scores, threshold) {
+  const industries = Object.keys(JEV_QUESTIONS).filter((id) => scores[id] >= threshold);
+  return industries.length ? industries : ['unknown'];
+}
+
+async function tagWithJev(pending, files, options) {
   const apiKey = process.env.TYPESAFE_API_KEY;
-  const pending = refs.filter((ref) => files[path.basename(ref.file)].industries[0] === 'unknown');
-  console.error(`Jev: gửi ${pending.length} file unknown tới ${JEV_ENDPOINT}`);
+  console.error(`Jev: gửi ${pending.length} file unknown chưa có kết quả Jev tới ${JEV_ENDPOINT}`);
   let failed = 0;
   let next = 0;
   async function worker() {
     while (next < pending.length) {
-      const ref = pending[next++];
-      const entry = files[path.basename(ref.file)];
+      const { name, excerpt } = pending[next++];
+      const entry = files[name];
       try {
-        const scores = await askJev(apiKey, describingExcerpt(readFileSync(ref.file, 'utf8')));
-        const industries = Object.keys(scores).filter((id) => scores[id] >= options.threshold);
-        Object.assign(entry, { industries: industries.length ? industries : ['unknown'], source: 'jev', jev: scores });
+        const scores = await askJev(apiKey, excerpt);
+        Object.assign(entry, { industries: jevIndustries(scores, options.threshold), source: 'jev', jev: scores });
       } catch (error) {
         failed += 1;
         entry.jevError = error.message;
@@ -115,28 +119,57 @@ async function tagWithJev(refs, files, options) {
   return { sent: pending.length, failed };
 }
 
+function readPrevious(output) {
+  if (!existsSync(output)) return {};
+  try {
+    const parsed = JSON.parse(readFileSync(output, 'utf8'));
+    if (!parsed || typeof parsed.files !== 'object') throw new Error('thiếu khoá "files"');
+    return parsed.files;
+  } catch (error) {
+    // Không ghi đè: file có thể chứa kết quả Jev đã trả phí.
+    fail(`${output} lỗi (${error.message}); sửa hoặc xoá file rồi chạy lại`, 1);
+  }
+}
+
 const options = parseArgs(process.argv.slice(2));
 if (options.jev && !process.env.TYPESAFE_API_KEY) fail('--jev cần biến môi trường TYPESAFE_API_KEY', 2);
 const loaded = loadRefs(options.dir, { useLocalTags: false });
 if (loaded.error) fail(loaded.error, loaded.code);
+const output = path.join(options.dir, TAGS_FILE);
+const previous = readPrevious(output);
 
 const files = {};
+const pending = [];
+let reused = 0;
 for (const ref of loaded.refs) {
-  files[path.basename(ref.file)] = { industries: ref.industries, visual: ref.visual, source: 'offline' };
+  const name = path.basename(ref.file);
+  const excerpt = describingExcerpt(readFileSync(ref.file, 'utf8'));
+  // Băm đúng phần sẽ gửi Jev: file sửa phần mô tả thì kết quả cũ không còn dùng được.
+  const hash = createHash('sha256').update(excerpt).digest('hex').slice(0, 16);
+  const old = previous[name];
+  if (old?.source === 'jev' && old.hash === hash && old.jev && typeof old.jev === 'object') {
+    files[name] = { industries: jevIndustries(old.jev, options.threshold), visual: ref.visual, source: 'jev', hash, jev: old.jev };
+    reused += 1;
+    continue;
+  }
+  files[name] = { industries: ref.industries, visual: ref.visual, source: 'offline', hash };
+  if (ref.industries[0] === 'unknown') pending.push({ name, excerpt });
 }
-const jev = options.jev ? await tagWithJev(loaded.refs, files, options) : null;
+const jev = options.jev ? await tagWithJev(pending, files, options) : null;
 const counts = {};
 for (const entry of Object.values(files)) for (const tag of entry.industries) counts[tag] = (counts[tag] || 0) + 1;
-const output = path.join(options.dir, TAGS_FILE);
-writeFileSync(output, `${JSON.stringify({
+// Ghi tạm rồi rename: ngắt giữa chừng không làm hỏng file cũ.
+const temp = `${output}.${process.pid}.tmp`;
+writeFileSync(temp, `${JSON.stringify({
   version: 1,
   industries: Object.keys(INDUSTRIES),
-  threshold: options.jev ? options.threshold : undefined,
+  threshold: options.threshold,
   counts,
   files,
 }, null, 2)}\n`);
+renameSync(temp, output);
 
 const total = loaded.refs.length;
-console.log(`Đã ghi ${output}: ${total} file, unknown ${counts.unknown || 0} (${Math.round(((counts.unknown || 0) / total) * 100)}%)`);
+console.log(`Đã ghi ${output}: ${total} file, unknown ${counts.unknown || 0} (${Math.round(((counts.unknown || 0) / total) * 100)}%); giữ lại ${reused} kết quả Jev cũ`);
 if (jev) console.log(`Jev: đã gửi ${jev.sent}, lỗi ${jev.failed}`);
 process.exit(jev?.failed ? 1 : 0);
