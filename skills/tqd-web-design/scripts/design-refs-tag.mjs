@@ -37,9 +37,15 @@ const USAGE = `Cách dùng:
   node design-refs-tag.mjs <thư mục DESIGN.md> [--jev] [--threshold 0.7]
 
 Ghi ${TAGS_FILE} vào thư mục đó (thẻ ngành 0..n mỗi file; thiếu bằng chứng = unknown).
-  --jev          gửi tên + mô tả + Imagery (≤2.000 ký tự, không gửi token/CSS) của các file
-                 còn unknown cho TypeSafe Jev; cần TYPESAFE_API_KEY. Chỉ bật khi đã được phép
-                 chia sẻ nội dung thư mục cho bên thứ ba.
+
+Hai lựa chọn:
+  (mặc định)     Không dùng Jev: đoán ngành bằng từ khoá ngay trên máy. Miễn phí, không gửi gì
+                 ra ngoài, nhưng nhiều file sẽ là unknown (vẫn tìm được theo màu sắc, phong cách).
+  --jev          Dùng Jev: dịch vụ AI trả phí của công ty TypeSafe đọc phần mô tả và đoán ngành
+                 cho các file còn unknown. Cần tài khoản TypeSafe (TYPESAFE_API_KEY), tốn phí theo
+                 lượng chữ, và gửi văn xuôi mô tả (tên, câu tóm tắt, đoạn mở đầu, Imagery; đã lọc
+                 khối code, HTML, bảng, CSS, mã màu; ≤2.000 ký tự/file) lên máy chủ TypeSafe.
+                 Chỉ bật khi đã được phép chia sẻ nội dung thư mục cho bên thứ ba.
   --threshold    ngưỡng xác suất noul để nhận một ngành (mặc định 0.7)`;
 
 function fail(message, code) {
@@ -185,4 +191,7 @@ renameSync(temp, output);
 const total = loaded.refs.length;
 console.log(`Đã ghi ${output}: ${total} file, unknown ${counts.unknown || 0} (${Math.round(((counts.unknown || 0) / total) * 100)}%); giữ lại ${reused} kết quả Jev cũ${stale ? `, ${stale} kết quả Jev cũ đã đổi mô tả (stale, chạy --jev để phân loại lại)` : ''}`);
 if (jev) console.log(`Jev: đã gửi ${jev.sent}, lỗi ${jev.failed}`);
+else if (pending.length) {
+  console.log(`${pending.length} file chưa đoán được ngành (vẫn tìm được theo màu sắc, phong cách). Muốn đoán thêm thì có thể chạy lại với --jev: dịch vụ AI trả phí của TypeSafe, gửi phần mô tả của các file này lên máy chủ của họ. Xem --help.`);
+}
 process.exit(jev?.failed ? 1 : 0);

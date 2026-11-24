@@ -33,9 +33,24 @@ node "${CLAUDE_SKILL_DIR}/scripts/design-refs-tag.mjs" "/đường/dẫn/ngoài/
 - Chạy offline, ghi `local-tags.json` vào **chính thư mục refs**, không ghi vào repo. Mỗi file có `industries` (0..n hoặc `unknown`), `visual`, `source`. Sau đó `design-intel --refs` đọc thẻ từ file này (`"localTags": true`, cột `ngành … (jev)` nếu nguồn là Jev). File hỏng thì `design-intel` thoát mã 1; xoá hoặc chạy lại.
 - Thẻ đã lưu chỉ được dùng khi `hash` còn khớp phần mô tả hiện tại và không bị gắn `stale`. Nếu không, `design-intel` dùng thẻ offline mới tính, đếm vào `references.staleTags` và in cảnh báo chạy lại `design-refs-tag.mjs`.
 - Trên bộ Refero 1.341 file, heuristic để lại khoảng 76% `unknown` vì phần lớn mô tả là thẩm mỹ, không nói ngành.
+
+### Dùng hay không dùng Jev
+
+Phần lớn người dùng chưa nghe tới Jev. Agent luôn chạy bản offline trước. Nếu còn file `unknown`, agent hỏi người dùng chọn một trong hai, bằng lời thường, và chờ câu trả lời rõ ràng:
+
+| | Không dùng Jev (mặc định) | Dùng Jev |
+| --- | --- | --- |
+| Là gì | Đoán ngành bằng từ khoá ngay trên máy | Dịch vụ AI trả phí của công ty TypeSafe đọc phần mô tả để đoán ngành |
+| Chi phí | Miễn phí | Tốn phí theo lượng chữ; cần tài khoản TypeSafe (`TYPESAFE_API_KEY`) |
+| Dữ liệu gửi đi | Không gửi gì | Văn xuôi mô tả của các file `unknown` lên máy chủ TypeSafe |
+| Kết quả | Nhiều file `unknown`, vẫn tìm được theo màu sắc, phong cách | Đoán được ngành cho nhiều file hơn; chưa kiểm chứng với API thật |
+
+Im lặng, "tuỳ bạn" hoặc chưa có key đều tính là **không dùng**.
+
 - `--jev` (tắt mặc định) gửi các file còn `unknown` cho TypeSafe Jev (`POST https://api.typesafe.ai/v1/systemone`, model `jev-latest`, cần `TYPESAFE_API_KEY`). Mỗi ngành là một câu hỏi noul riêng; nhận ngành khi xác suất ≥ `--threshold` (mặc định 0.7), nên một style có thể có nhiều ngành.
-  - Chỉ gửi tên, câu tóm tắt, đoạn mô tả và `## Imagery` (≤ 2.000 ký tự/file); không gửi token, CSS hay HTML mẫu.
+  - Chỉ gửi văn xuôi của tên, câu tóm tắt, đoạn mở đầu và `## Imagery` (≤ 2.000 ký tự/file). Trước khi gửi, script bỏ khối code (```` ``` ````/`~~~`, thụt 4 dấu cách), thẻ HTML, khối `<style>`/`<script>`, chú thích HTML, bảng, dòng có `{ }` hoặc dạng `thuộc-tính: giá-trị;`, inline code, biến `--…`, `var()`/`url()`/`rgb()`/`hsl()` và mã màu hex. Đây là bộ lọc heuristic: câu chữ mô tả vẫn được gửi nguyên văn, và CSS viết lẫn trong câu văn thường có thể lọt qua. Các mục token (`## Tokens …`), Quick Start và HTML mẫu nằm ngoài phần trích nên không bao giờ được gửi.
   - **Chỉ bật khi người giữ file đã xác nhận được phép gửi nội dung cho bên thứ ba.** Có phí theo token của TypeSafe.
+  - Đổi bộ lọc làm đổi `hash` của file có markup trong phần mô tả; kết quả Jev cũ của các file đó thành `stale` cho tới lần `--jev` kế tiếp.
   - File gọi lỗi giữ thẻ đang có (offline, hoặc kết quả Jev cũ nếu file đang stale) kèm `jevError`; script vẫn ghi kết quả và thoát mã 1.
   - Chạy lại (offline hay `--jev`) không bao giờ xoá kết quả Jev đã có. Phần mô tả không đổi (so bằng `hash`) thì dùng lại. Đã đổi thì giữ kết quả cũ, gắn `"stale": true`; chỉ `--jev` gọi thành công mới thay nó. Bản ghi Jev cũ chưa có `hash` được coi là khớp và gắn hash ở lần chạy đầu. `--jev` chỉ gửi file mới `unknown`, file stale và file lỗi lần trước. `local-tags.json` hỏng thì script dừng (mã 1), không ghi đè. File được ghi tạm rồi đổi tên nên ngắt giữa chừng không làm hỏng bản cũ.
   - Đường gọi Jev chỉ được test với server giả trong repo; chưa kiểm chứng với API thật.

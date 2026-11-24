@@ -94,10 +94,42 @@ function section(markdown, heading) {
   return end === -1 ? rest : rest.slice(0, end);
 }
 
-/** Phần mô tả (mở đầu + Imagery), bỏ token/CSS; là thứ duy nhất được gửi cho Jev khi bật. */
+// Chỉ giữ văn xuôi: bỏ khối code, HTML, bảng, dòng giống CSS, inline code, biến CSS và mã màu.
+// Đây là bộ lọc heuristic; câu chữ mô tả vẫn được giữ nguyên văn.
+function proseOnly(text) {
+  const withoutMarkup = text
+    .replace(/<(style|script)\b[\s\S]*?(?:<\/\1\s*>|$)/gi, ' ')
+    .replace(/<!--[\s\S]*?(?:-->|$)/g, ' ')
+    .replace(/<\/?[A-Za-z][^>]*>?/g, ' ');
+  const kept = [];
+  let fence = null;
+  for (const line of withoutMarkup.split('\n')) {
+    const marker = line.match(/^\s*(`{3,}|~{3,})/);
+    if (fence) {
+      if (marker && marker[1][0] === fence[0] && marker[1].length >= fence.length) fence = null;
+      continue;
+    }
+    if (marker) {
+      fence = marker[1];
+      continue;
+    }
+    if (/^(?: {4,}|\t)(?![-*+]\s|\d+\.\s)/.test(line)) continue;
+    if (/[{}]|^\s*\||^\s*[-\w]+\s*:\s*[^;]*;\s*$/.test(line)) continue;
+    kept.push(line
+      .replace(/`[^`\n]*`/g, ' ')
+      .replace(/(?:url|rgba?|hsla?|var)\([^)]*\)/gi, ' ')
+      .replace(/--[\w-]+/g, ' ')
+      .replace(/#[0-9a-f]{3,8}\b/gi, ' ')
+      .replace(/[ \t]{2,}/g, ' ')
+      .trimEnd());
+  }
+  return kept.join('\n');
+}
+
+/** Văn xuôi mô tả (mở đầu + Imagery) đã lọc markup; là thứ duy nhất được gửi cho Jev khi bật. */
 export function describingExcerpt(markdown, limit = 2000) {
   const intro = markdown.split(/^## /m)[0];
-  return [intro, section(markdown, 'Imagery')].join('\n').replace(/\n{3,}/g, '\n\n').trim().slice(0, limit);
+  return proseOnly([intro, section(markdown, 'Imagery')].join('\n')).replace(/\n{3,}/g, '\n\n').trim().slice(0, limit);
 }
 
 /** Băm phần mô tả; `local-tags.json` lưu giá trị này để biết thẻ còn khớp file hay không. */

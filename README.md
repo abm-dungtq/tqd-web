@@ -79,7 +79,14 @@ node skills/tqd-web-design/scripts/design-intel.mjs "quán cà phê ấm cúng" 
 
 Lệnh trả về vài hướng thiết kế, bảng màu đã kiểm tra độ tương phản, cặp font hiển thị đủ dấu tiếng Việt và các quy tắc trải nghiệm. Không cần mạng, Python hay npm. Nếu câu mô tả không khớp từ khoá nào, lệnh nói rõ là không khớp thay vì tự chọn bừa một hướng.
 
-Trên `main` (chưa phát hành), bạn có thể chỉ cần thêm `--refs <thư mục>` tới một thư mục DESIGN.md của riêng mình, ví dụ bản tải từ Refero Styles. Thư mục đó phải nằm ngoài repo; plugin không kèm, không chép lại nội dung của bên thứ ba. Quyền dùng và cách chuyển thành thiết kế riêng nằm trong [external-design-md.md](skills/tqd-web-design/references/external-design-md.md).
+Từ bản 2.4.0, bạn có thể thêm `--refs <thư mục>` để agent tra thêm một thư mục DESIGN.md của riêng mình, ví dụ bản tải từ Refero Styles. Thư mục đó phải nằm ngoài repo; plugin không kèm, không chép lại nội dung của bên thứ ba. Quyền dùng và cách chuyển thành thiết kế riêng nằm trong [external-design-md.md](skills/tqd-web-design/references/external-design-md.md).
+
+Với thư mục này, agent sẽ hỏi bạn chọn một trong hai cách đoán ngành cho từng mẫu:
+
+- **Không dùng Jev** (mặc định): miễn phí, chạy trên máy, không gửi gì ra ngoài. Nhiều mẫu sẽ chưa rõ ngành nhưng vẫn tìm được theo màu sắc, phong cách.
+- **Dùng Jev**: Jev là dịch vụ AI trả phí của công ty TypeSafe, đọc phần mô tả để đoán ngành chính xác hơn. Cần tài khoản TypeSafe, tốn phí theo lượng chữ, và phần mô tả của các mẫu chưa rõ ngành sẽ được gửi lên máy chủ của họ.
+
+Không biết chọn gì thì cứ chọn "không dùng"; agent không bao giờ tự bật Jev.
 
 ---
 

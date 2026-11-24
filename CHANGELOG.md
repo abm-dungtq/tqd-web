@@ -2,6 +2,16 @@
 
 Mọi thay đổi đáng chú ý của plugin `tqd-web` được ghi ở đây. Định dạng theo [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), phiên bản theo [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [Unreleased]
+
+### Sửa
+
+- `design-refs-tag --jev`: phần mô tả gửi cho Jev nay chỉ còn văn xuôi. Khối code, thẻ HTML, `<style>`/`<script>`, chú thích HTML, bảng, dòng giống CSS, inline code, biến `--…`, `var()`/`url()`/`rgb()`/`hsl()` và mã màu hex nằm trong phần mở đầu hoặc `## Imagery` bị lọc trước khi gửi. Trước đây hai phần này được gửi nguyên văn, kể cả code và markup, dù tài liệu hứa không gửi CSS/HTML. Tài liệu nay nói rõ đây là bộ lọc heuristic. Thêm test với server giả, cài chuỗi đánh dấu CSS/HTML vào cả hai phần. File có markup trong phần mô tả sẽ đổi `hash`, nên kết quả Jev cũ của chúng thành `stale`.
+
+### Thay đổi
+
+- Dùng Jev hay không nay là lựa chọn của người dùng, được giải thích bằng lời thường. `tqd-web-design` yêu cầu agent chạy bản offline trước, rồi hỏi người dùng chọn "Không dùng Jev" (mặc định: miễn phí, không gửi gì ra ngoài) hoặc "Dùng Jev" (dịch vụ AI trả phí của TypeSafe, gửi phần mô tả lên máy chủ của họ). Im lặng hoặc thiếu key tính là không dùng. `design-refs-tag --help` và dòng kết quả offline cũng giải thích hai lựa chọn. README giải thích hai lựa chọn; `external-design-md.md` có bảng so sánh.
+
 ## [2.4.0] - 2026-11-24
 
 ### Thêm

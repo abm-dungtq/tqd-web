@@ -139,6 +139,55 @@ test('refs-tag: --jev sends only unknown files, only their description, and feed
   }
 });
 
+test('refs-tag: --jev strips code, HTML and CSS from the intro and Imagery before sending', async () => {
+  const dir = copyFixtures();
+  const leaks = ['FENCE_CSS', 'TILDE_CSS', 'INDENTED_CODE', 'HTML_ATTR', 'STYLE_BLOCK', 'COMMENT_TEXT', 'INLINE_CODE', 'CSS_DECL', 'TABLE_CELL',
+    '--color-secret', '#ab12cd', 'url(secret.png)'];
+  writeFileSync(path.join(dir, 'gallery-objects.md'), `# Gallery Objects — Style Reference
+> Gallery wall of black-on-white objects
+
+**Theme:** light
+
+Intro prose PROSE_INTRO stays, accent #ab12cd and \`INLINE_CODE\` and var(--color-secret) go.
+
+\`\`\`css
+.hero { color: FENCE_CSS; }
+\`\`\`
+
+<div class="HTML_ATTR">Inline HTML PROSE_HTML_TEXT</div>
+<style>
+.x { content: "STYLE_BLOCK" }
+</style>
+<!-- COMMENT_TEXT -->
+    INDENTED_CODE();
+
+## Tokens — Colors
+
+| Ink | \`#111111\` |
+
+## Imagery
+
+Imagery prose PROSE_IMAGERY stays, background url(secret.png).
+~~~
+TILDE_CSS
+~~~
+background-color: CSS_DECL;
+| TABLE_CELL | x |
+`);
+  try {
+    await withJevMock(() => 0.1, async (endpoint, requests) => {
+      const result = await run(TAGGER, [dir, '--jev'], { TQD_JEV_ENDPOINT: endpoint, TYPESAFE_API_KEY: 'k' });
+      assert.equal(result.status, 0, result.stderr);
+      const sent = requests.find((request) => request.body.state.includes('PROSE_INTRO'))?.body.state;
+      assert.ok(sent, 'gallery-objects.md must be sent');
+      for (const prose of ['Gallery Objects', 'PROSE_INTRO', 'PROSE_HTML_TEXT', 'PROSE_IMAGERY']) assert.ok(sent.includes(prose), `missing ${prose}`);
+      for (const leak of leaks) assert.ok(!sent.includes(leak), `leaked ${leak}: ${sent}`);
+    });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('refs-tag: reruns keep paid Jev results, resend only changed or failed files', async () => {
   const dir = copyFixtures();
   const env = (endpoint) => ({ TQD_JEV_ENDPOINT: endpoint, TYPESAFE_API_KEY: 'k' });
