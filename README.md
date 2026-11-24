@@ -95,26 +95,17 @@ Sau khi bật plugin, nhắn cho agent một câu như:
 
 ## Cài đặt
 
-### Claude Code
+Hướng dẫn đầy đủ cho từng agent, kèm cập nhật, gỡ cài đặt và đoạn lệnh để agent tự cài: [docs/install.md](docs/install.md).
 
-```bash
-/plugin marketplace add abm-dungtq/tqd-web
-/plugin install tqd-web@tqd-studio
-```
+| Agent | Lệnh |
+| --- | --- |
+| Claude Code | `/plugin marketplace add abm-dungtq/tqd-web` rồi `/plugin install tqd-web@tqd-studio` |
+| Codex (CLI, app ChatGPT desktop) | `codex plugin marketplace add abm-dungtq/tqd-web` rồi `codex plugin add tqd-web@tqd-studio` |
+| Antigravity (App, CLI, IDE) | `agy plugin install https://github.com/abm-dungtq/tqd-web` |
+| Gemini CLI | `gemini extensions install https://github.com/abm-dungtq/tqd-web` (chưa chạy thử) |
+| Cursor, OpenCode, Copilot… | `npx skills add abm-dungtq/tqd-web` (chỉ skill, không kèm luật chung và agent phụ) |
 
-### Gemini CLI
-
-Cài thẳng từ GitHub (kho có sẵn `gemini-extension.json`):
-
-```bash
-gemini extensions install https://github.com/abm-dungtq/tqd-web
-```
-
-### Antigravity IDE
-
-Sao chép hoặc liên kết thư mục kho vào `~/.gemini/config/plugins/tqd-web`, rồi mở trang Customizations để bật **TQD Web Studio**.
-
-Luật chung của plugin nằm ở `rules/AGENTS.md`. Gemini CLI nạp tệp này qua `contextFileName` trong `gemini-extension.json`, Claude Code nạp qua từng skill; Antigravity chưa được kiểm chứng.
+Luật chung của plugin nằm ở `rules/AGENTS.md`. Antigravity nạp tệp này như luật luôn bật, Gemini CLI nạp qua `contextFileName`, Claude Code và Codex nạp qua từng skill.
 
 ---
 

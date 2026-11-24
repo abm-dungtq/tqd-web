@@ -10,6 +10,10 @@ Mọi thay đổi đáng chú ý của plugin `tqd-web` được ghi ở đây. 
 - `scripts/design-refs-tag.mjs <thư mục>`: gắn thẻ offline và ghi `local-tags.json` vào chính thư mục refs; `design-intel --refs` dùng thẻ này nếu có. Cờ `--jev` (tắt mặc định, cần `TYPESAFE_API_KEY`) gửi phần mô tả (không gửi token/CSS) của file còn `unknown` cho TypeSafe Jev, mỗi ngành một câu hỏi noul nên một style có thể nhiều ngành. Đường Jev chỉ được test với server giả, chưa gọi API thật.
 - 8 test cho `design-refs-tag`: offline không gọi mạng, thiếu key thoát 2, Jev chỉ nhận file `unknown` và không nhận token, chạy lại giữ kết quả Jev đã trả phí (chỉ gửi lại file đổi mô tả hoặc lỗi; chạy offline sau khi sửa mô tả giữ kết quả cũ dạng `stale`), bản ghi Jev chưa có `hash` (định dạng của commit 5dded3d) được giữ và gắn hash thay vì bị xoá, `local-tags.json` hỏng không bị ghi đè, lỗi Jev giữ thẻ đang có và thoát 1, `local-tags.json` hỏng làm `design-intel` thoát 1.
 - 7 test mới: fallback khi không khớp, và `--refs` trên 5 fixture tự viết (xếp hạng quán cà phê, ẩn dụ một lần không gán ngành, style `unknown` vẫn tìm được qua thẻ thị giác, nhiều ngành, biến môi trường, mã thoát lỗi).
+- Đóng gói cho Codex: `.codex-plugin/plugin.json` (6 skill, giao diện tiếng Việt, logo) và marketplace `.agents/plugins/marketplace.json` (`tqd-web@tqd-studio`). Đã cài thử bằng Codex CLI 0.169.0: nạp đủ 6 skill `tqd-web:*`.
+- `plugin.json` (Antigravity) thêm `$schema`, `license`, `keywords`; `agy plugin validate --strict` 0 cảnh báo, `agy plugin install` từ URL GitHub cài 6 skill, 2 agent, 1 luật.
+- `docs/install.md`: hướng dẫn cài, cập nhật, gỡ cho Claude Code, Codex, Antigravity, Gemini CLI và agent chỉ đọc skill (`npx skills add`), kèm đoạn lệnh để agent tự cài. README rút mục Cài đặt thành bảng trỏ tới tài liệu này.
+- Test: kiểm tra phiên bản và tên ở `.codex-plugin/plugin.json`; mọi đường dẫn trong các tệp khai báo (logo, skills, marketplace, luật) phải tồn tại.
 
 ### Sửa
 

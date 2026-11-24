@@ -30,8 +30,12 @@ test('version: every manifest, skill, README, NOTICE and CHANGELOG agree', () =>
   assert.match(canonical, /^\d+\.\d+\.\d+$/);
 
   assert.equal(JSON.parse(read('plugin.json')).version, canonical, 'plugin.json');
+  assert.equal(JSON.parse(read('.codex-plugin/plugin.json')).version, canonical, '.codex-plugin/plugin.json');
   assert.equal(JSON.parse(read('gemini-extension.json')).version, canonical, 'gemini-extension.json');
   assert.deepEqual(versionsAtAnyDepth(JSON.parse(read('.claude-plugin/marketplace.json'))), [canonical, canonical], 'marketplace.json');
+  for (const manifest of ['plugin.json', '.codex-plugin/plugin.json', 'gemini-extension.json']) {
+    assert.equal(JSON.parse(read(manifest)).name, 'tqd-web', `${manifest}: name`);
+  }
 
   const skillsDir = path.join(repoRoot, 'skills');
   const skills = fs.readdirSync(skillsDir, { withFileTypes: true }).filter((entry) => entry.isDirectory());
@@ -50,4 +54,18 @@ test('version: every manifest, skill, README, NOTICE and CHANGELOG agree', () =>
   const heading = /^## \[(\d+\.\d+\.\d+)\]/m.exec(changelog);
   assert.ok(heading, 'CHANGELOG.md has a version heading');
   assert.equal(heading[1], canonical, 'CHANGELOG.md latest version');
+});
+
+test('manifests: every path a host resolves exists inside the plugin', () => {
+  const antigravity = JSON.parse(read('plugin.json'));
+  const codex = JSON.parse(read('.codex-plugin/plugin.json'));
+  const codexMarketplace = JSON.parse(read('.agents/plugins/marketplace.json'));
+  const paths = [antigravity.logo, codex.skills, codex.interface.logo, codex.interface.composerIcon,
+    JSON.parse(read('gemini-extension.json')).contextFileName,
+    ...codexMarketplace.plugins.map((plugin) => plugin.source.path)];
+  for (const relPath of paths) {
+    assert.ok(fs.existsSync(path.join(repoRoot, relPath)), `${relPath} exists`);
+  }
+  assert.ok(antigravity.suggestedPrompts.length <= 3, 'Antigravity shows at most 3 prompts');
+  assert.deepEqual(codexMarketplace.plugins.map((plugin) => plugin.name), ['tqd-web']);
 });

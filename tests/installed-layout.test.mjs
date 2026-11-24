@@ -12,7 +12,7 @@ import { makeRealSite } from './helpers/real-site.mjs';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.dirname(__dirname);
 
-const PLUGIN_PARTS = ['skills', 'agents', 'rules', '.claude-plugin', 'plugin.json', 'gemini-extension.json'];
+const PLUGIN_PARTS = ['skills', 'agents', 'rules', 'assets', '.claude-plugin', '.codex-plugin', '.agents', 'plugin.json', 'gemini-extension.json'];
 
 function copyPlugin(destDir) {
   fs.mkdirSync(destDir, { recursive: true });

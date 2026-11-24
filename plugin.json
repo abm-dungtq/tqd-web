@@ -1,4 +1,5 @@
 {
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
   "name": "tqd-web",
   "displayName": "TQD Web Studio",
   "description": "Thiết kế và xuất bản website chất lượng cao từ A đến Z dành cho người không biết lập trình: hỏi bằng ngôn ngữ đời thường, xem trước trực quan, chuẩn SEO và dễ tự sửa nội dung.",
@@ -14,5 +15,7 @@
     "url": "https://tqd.me"
   },
   "homepage": "https://tqd.me",
-  "repository": "https://github.com/abm-dungtq/tqd-web"
+  "repository": "https://github.com/abm-dungtq/tqd-web",
+  "license": "MIT",
+  "keywords": ["website", "landing-page", "seo", "design", "vietnamese", "no-code"]
 }
