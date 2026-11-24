@@ -188,6 +188,51 @@ background-color: CSS_DECL;
   }
 });
 
+test('refs-tag: --jev ignores fake "## Imagery" headings inside Tokens code blocks', async () => {
+  const dir = copyFixtures();
+  const tokens = (body) => `## Tokens — Colors
+
+${body}
+
+## Tokens — Typography
+
+### Soehne Mono — Labels
+`;
+  // Không có Imagery thật: heading giả trong fence không được biến phần sau thành đoạn trích.
+  writeFileSync(path.join(dir, 'gallery-objects.md'), `# Gallery Objects — Style Reference
+> Monochrome plinths PROSE_A
+
+${tokens('```\n## Imagery\nSECRET_FENCE=1\n```\n~~~~\n## Imagery\nSECRET_TILDE=1\n~~~~')}`);
+  // Có Imagery thật ở sau: heading giả trong <pre> và fence chưa đóng ở cuối không được gửi.
+  writeFileSync(path.join(dir, 'fake-heading.md'), `# Fake Heading — Style Reference
+> Quiet grid PROSE_B
+
+${tokens('<pre>\n## Imagery\nSECRET_PRE=1\n</pre>')}
+## Imagery
+
+Plain renders PROSE_IMAGERY_B.
+
+## Quick Start
+
+\`\`\`
+## Imagery
+SECRET_UNCLOSED=1
+`);
+  try {
+    await withJevMock(() => 0.1, async (endpoint, requests) => {
+      const result = await run(TAGGER, [dir, '--jev'], { TQD_JEV_ENDPOINT: endpoint, TYPESAFE_API_KEY: 'k' });
+      assert.equal(result.status, 0, result.stderr);
+      const sent = requests.map((request) => request.body.state).join('\n');
+      for (const prose of ['PROSE_A', 'PROSE_B', 'PROSE_IMAGERY_B']) assert.ok(sent.includes(prose), `missing ${prose}`);
+      for (const leak of ['SECRET_FENCE', 'SECRET_TILDE', 'SECRET_PRE', 'SECRET_UNCLOSED', 'Soehne']) {
+        assert.ok(!sent.includes(leak), `leaked ${leak}: ${sent}`);
+      }
+    });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('refs-tag: reruns keep paid Jev results, resend only changed or failed files', async () => {
   const dir = copyFixtures();
   const env = (endpoint) => ({ TQD_JEV_ENDPOINT: endpoint, TYPESAFE_API_KEY: 'k' });

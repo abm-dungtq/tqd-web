@@ -7,6 +7,7 @@ Mọi thay đổi đáng chú ý của plugin `tqd-web` được ghi ở đây. 
 ### Sửa
 
 - `design-refs-tag --jev`: phần mô tả gửi cho Jev nay chỉ còn văn xuôi. Khối code, thẻ HTML, `<style>`/`<script>`, chú thích HTML, bảng, dòng giống CSS, inline code, biến `--…`, `var()`/`url()`/`rgb()`/`hsl()` và mã màu hex nằm trong phần mở đầu hoặc `## Imagery` bị lọc trước khi gửi. Trước đây hai phần này được gửi nguyên văn, kể cả code và markup, dù tài liệu hứa không gửi CSS/HTML. Tài liệu nay nói rõ đây là bộ lọc heuristic. Thêm test với server giả, cài chuỗi đánh dấu CSS/HTML vào cả hai phần. File có markup trong phần mô tả sẽ đổi `hash`, nên kết quả Jev cũ của chúng thành `stale`.
+- `design-refs-tag --jev`: heading `## Imagery` chỉ được nhận khi nằm ngoài khối code. Trước đây một dòng `## Imagery` nằm trong khối code của mục Tokens bị coi là heading thật, nên phần nằm sau nó (ví dụ `SECRET=…`) bị gửi cho Jev. Script nay bỏ khối code, `<pre>`/`<code>`/`<textarea>`/`<style>`/`<script>` và chú thích HTML trên toàn file trước khi tìm heading. Thêm test với server giả cho heading giả trong fence ```` ``` ````, `~~~~`, `<pre>` và fence chưa đóng.
 
 ### Thay đổi
 

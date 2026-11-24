@@ -94,25 +94,33 @@ function section(markdown, heading) {
   return end === -1 ? rest : rest.slice(0, end);
 }
 
-// Chỉ giữ văn xuôi: bỏ khối code, HTML, bảng, dòng giống CSS, inline code, biến CSS và mã màu.
-// Đây là bộ lọc heuristic; câu chữ mô tả vẫn được giữ nguyên văn.
-function proseOnly(text) {
-  const withoutMarkup = text
-    .replace(/<(style|script)\b[\s\S]*?(?:<\/\1\s*>|$)/gi, ' ')
-    .replace(/<!--[\s\S]*?(?:-->|$)/g, ' ')
-    .replace(/<\/?[A-Za-z][^>]*>?/g, ' ');
+// Bỏ khối code (``` hoặc ~~~, kể cả fence chưa đóng), <style>/<script>/<pre>/<code>/<textarea> và
+// chú thích HTML trên toàn file TRƯỚC khi tìm heading: một dòng "## Imagery" nằm trong fence
+// của mục Tokens không được coi là heading thật.
+function withoutBlocks(markdown) {
   const kept = [];
   let fence = null;
-  for (const line of withoutMarkup.split('\n')) {
+  const text = markdown
+    .replace(/<(style|script|pre|code|textarea)\b[\s\S]*?(?:<\/\1\s*>|$)/gi, ' ')
+    .replace(/<!--[\s\S]*?(?:-->|$)/g, ' ');
+  for (const line of text.split('\n')) {
     const marker = line.match(/^\s*(`{3,}|~{3,})/);
     if (fence) {
       if (marker && marker[1][0] === fence[0] && marker[1].length >= fence.length) fence = null;
-      continue;
-    }
-    if (marker) {
+    } else if (marker) {
       fence = marker[1];
-      continue;
+    } else {
+      kept.push(line);
     }
+  }
+  return kept.join('\n');
+}
+
+// Chỉ giữ văn xuôi: bỏ HTML, code thụt lề, bảng, dòng giống CSS, inline code, biến CSS và mã màu.
+// Đây là bộ lọc heuristic; câu chữ mô tả vẫn được giữ nguyên văn.
+function proseOnly(text) {
+  const kept = [];
+  for (const line of text.replace(/<\/?[A-Za-z][^>]*>?/g, ' ').split('\n')) {
     if (/^(?: {4,}|\t)(?![-*+]\s|\d+\.\s)/.test(line)) continue;
     if (/[{}]|^\s*\||^\s*[-\w]+\s*:\s*[^;]*;\s*$/.test(line)) continue;
     kept.push(line
@@ -128,8 +136,9 @@ function proseOnly(text) {
 
 /** Văn xuôi mô tả (mở đầu + Imagery) đã lọc markup; là thứ duy nhất được gửi cho Jev khi bật. */
 export function describingExcerpt(markdown, limit = 2000) {
-  const intro = markdown.split(/^## /m)[0];
-  return proseOnly([intro, section(markdown, 'Imagery')].join('\n')).replace(/\n{3,}/g, '\n\n').trim().slice(0, limit);
+  const prose = withoutBlocks(markdown);
+  const intro = prose.split(/^## /m)[0];
+  return proseOnly([intro, section(prose, 'Imagery')].join('\n')).replace(/\n{3,}/g, '\n\n').trim().slice(0, limit);
 }
 
 /** Băm phần mô tả; `local-tags.json` lưu giá trị này để biết thẻ còn khớp file hay không. */
