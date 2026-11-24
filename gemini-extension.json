@@ -1,6 +1,6 @@
 {
   "name": "tqd-web",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "TQD Web Studio: Zero-knowledge website design, SEO, audit & launch plugin.",
   "contextFileName": "rules/AGENTS.md",
   "author": {

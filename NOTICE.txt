@@ -1,4 +1,4 @@
-TQD Web Studio (tqd-web v2.3.0)
+TQD Web Studio (tqd-web v2.4.0)
 Copyright (c) 2026 TQD (https://tqd.me)
 
 Licensed under the MIT License (see LICENSE.txt).
@@ -14,7 +14,7 @@ All WordPress GPL-2.0 components, off-topic presentation slide assets, and
 runtime AgentKit dependencies present in the v1.x fork were completely removed
 in v2.0.
 
-Third-party design datasets (tqd-web-design v2.3.0):
+Third-party design datasets (tqd-web-design v2.4.0):
 skills/tqd-web-design/data/*.json is a curated, rewritten subset derived from
 nextlevelbuilder/ui-ux-pro-max-skill
 (https://github.com/nextlevelbuilder/ui-ux-pro-max-skill),

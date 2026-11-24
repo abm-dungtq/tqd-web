@@ -4,7 +4,7 @@
 
 # TQD Web Studio (`tqd-web`)
 
-**Phiên bản 2.3.0** · MIT · Antigravity IDE · Claude Code · Gemini CLI
+**Phiên bản 2.4.0** · MIT · Claude Code · Codex · Antigravity · Gemini CLI
 
 Bạn mô tả cửa hàng hay dịch vụ bằng lời thường, AI agent dựng giúp một website tiếng Việt xem tốt trên điện thoại, có sẵn cấu trúc cho Google và để bạn tự sửa chữ, giá, ảnh về sau. Plugin dành cho chủ quán, chủ tiệm, người làm dịch vụ không biết lập trình hay thiết kế. Người làm web cho khách bằng agent cũng dùng được.
 

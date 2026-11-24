@@ -2,13 +2,13 @@
 
 Mọi thay đổi đáng chú ý của plugin `tqd-web` được ghi ở đây. Định dạng theo [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), phiên bản theo [Semantic Versioning](https://semver.org/lang/vi/).
 
-## [Unreleased]
+## [2.4.0] - 2026-11-24
 
 ### Thêm
 
 - `design-intel.mjs --refs <thư mục>` (hoặc `TQD_DESIGN_REFS`): xếp hạng thêm một thư mục DESIGN.md người dùng tự có (ví dụ export Refero Styles) theo thẻ thị giác và 0..n thẻ ngành; thiếu bằng chứng thì gán `unknown`. Thư mục phải nằm ngoài repo; plugin không kèm, không chuyển đổi nội dung bên thứ ba. Module mới `scripts/design-refs.mjs`, quy tắc ở `references/external-design-md.md`.
 - `scripts/design-refs-tag.mjs <thư mục>`: gắn thẻ offline và ghi `local-tags.json` vào chính thư mục refs; `design-intel --refs` dùng thẻ này nếu có. Cờ `--jev` (tắt mặc định, cần `TYPESAFE_API_KEY`) gửi phần mô tả (không gửi token/CSS) của file còn `unknown` cho TypeSafe Jev, mỗi ngành một câu hỏi noul nên một style có thể nhiều ngành. Đường Jev chỉ được test với server giả, chưa gọi API thật.
-- 8 test cho `design-refs-tag`: offline không gọi mạng, thiếu key thoát 2, Jev chỉ nhận file `unknown` và không nhận token, chạy lại giữ kết quả Jev đã trả phí (chỉ gửi lại file đổi mô tả hoặc lỗi; chạy offline sau khi sửa mô tả giữ kết quả cũ dạng `stale`), bản ghi Jev chưa có `hash` (định dạng của commit 5dded3d) được giữ và gắn hash thay vì bị xoá, `local-tags.json` hỏng không bị ghi đè, lỗi Jev giữ thẻ đang có và thoát 1, `local-tags.json` hỏng làm `design-intel` thoát 1.
+- 8 test cho `design-refs-tag`: offline không gọi mạng, thiếu key thoát 2, Jev chỉ nhận file `unknown` và không nhận token, chạy lại giữ kết quả Jev đã trả phí (chỉ gửi lại file đổi mô tả hoặc lỗi; chạy offline sau khi sửa mô tả giữ kết quả cũ dạng `stale`), bản ghi Jev chưa có `hash` (định dạng của commit 5dded3d) được giữ và gắn hash thay vì bị xoá, `local-tags.json` hỏng không bị ghi đè, lỗi Jev giữ thẻ đang có và thoát 1, `local-tags.json` hỏng làm `design-intel` thoát 1. Một test đầu-cuối: sửa mô tả → (gắn thẻ offline) → `design-intel` không xếp hạng bằng thẻ Jev cũ.
 - 7 test mới: fallback khi không khớp, và `--refs` trên 5 fixture tự viết (xếp hạng quán cà phê, ẩn dụ một lần không gán ngành, style `unknown` vẫn tìm được qua thẻ thị giác, nhiều ngành, biến môi trường, mã thoát lỗi).
 - Đóng gói cho Codex: `.codex-plugin/plugin.json` (6 skill, giao diện tiếng Việt, logo) và marketplace `.agents/plugins/marketplace.json` (`tqd-web@tqd-studio`). Đã cài thử bằng Codex CLI 0.169.0: nạp đủ 6 skill `tqd-web:*`.
 - `plugin.json` (Antigravity) thêm `$schema`, `license`, `keywords`; `agy plugin validate --strict` 0 cảnh báo, `agy plugin install` từ URL GitHub cài 6 skill, 2 agent, 1 luật.
@@ -19,6 +19,8 @@ Mọi thay đổi đáng chú ý của plugin `tqd-web` được ghi ở đây. 
 
 - `design-intel`: truy vấn không khớp từ khoá nào nay trả `"matched": false` kèm ghi chú fallback; `--plan` liệt kê tham khảo thay vì tự chọn hướng. Trước đây điểm cộng bề mặt (+4) làm cảnh báo không bao giờ hiện.
 - `tqd-web-app` Verification Status: SePay/Polar verifier và `checkout-helper.js` có unit test offline; Stripe chỉ có hướng dẫn tham khảo, không có script xác thực đi kèm.
+- `design-intel --refs`: thẻ trong `local-tags.json` mà `hash` không còn khớp phần mô tả hiện tại, hoặc đã gắn `stale`, không còn được dùng để xếp hạng; script dùng thẻ offline mới tính, trả `references.staleTags` và in cảnh báo chạy lại `design-refs-tag.mjs`. Kết quả Jev vẫn được giữ trên đĩa.
+- `README`, `NOTICE`, các tệp khai báo plugin và 6 `SKILL.md` sang `2.4.0`.
 
 ### Ghi chú
 

@@ -7,7 +7,7 @@ compatibility: "macOS, Linux, Windows (Node.js >= 20)"
 license: "MIT"
 metadata:
   author: tqd
-  version: "2.3.0"
+  version: "2.4.0"
 ---
 
 # TQD Web App (Tier 3 Opt-In)
@@ -67,7 +67,7 @@ Default to managed serverless services so the owner avoids VPS patching, manual 
 | **Vietnam Payments** | SePay + VietQR (`vietqr.app`) | Automatic bank transfer matching and VND webhook alerts |
 | **Global Payments** | Polar (Merchant of Record) or Stripe | Global cards, subscriptions, and automated tax/VAT options |
 
-## Verification Status (2.3.0)
+## Verification Status (2.4.0)
 
 This skill is documentation plus bundled payment scripts. It is **not** a tested app template; keep these limits visible before promising a stack:
 
