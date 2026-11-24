@@ -31,6 +31,7 @@ node "${CLAUDE_SKILL_DIR}/scripts/design-refs-tag.mjs" "/đường/dẫn/ngoài/
 ```
 
 - Chạy offline, ghi `local-tags.json` vào **chính thư mục refs**, không ghi vào repo. Mỗi file có `industries` (0..n hoặc `unknown`), `visual`, `source`. Sau đó `design-intel --refs` đọc thẻ từ file này (`"localTags": true`, cột `ngành … (jev)` nếu nguồn là Jev). File hỏng thì `design-intel` thoát mã 1; xoá hoặc chạy lại.
+- Thẻ đã lưu chỉ được dùng khi `hash` còn khớp phần mô tả hiện tại và không bị gắn `stale`. Nếu không, `design-intel` dùng thẻ offline mới tính, đếm vào `references.staleTags` và in cảnh báo chạy lại `design-refs-tag.mjs`.
 - Trên bộ Refero 1.341 file, heuristic để lại khoảng 76% `unknown` vì phần lớn mô tả là thẩm mỹ, không nói ngành.
 - `--jev` (tắt mặc định) gửi các file còn `unknown` cho TypeSafe Jev (`POST https://api.typesafe.ai/v1/systemone`, model `jev-latest`, cần `TYPESAFE_API_KEY`). Mỗi ngành là một câu hỏi noul riêng; nhận ngành khi xác suất ≥ `--threshold` (mặc định 0.7), nên một style có thể có nhiều ngành.
   - Chỉ gửi tên, câu tóm tắt, đoạn mô tả và `## Imagery` (≤ 2.000 ký tự/file); không gửi token, CSS hay HTML mẫu.

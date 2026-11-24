@@ -8,10 +8,9 @@
  * nhận được phép gửi nội dung đó cho bên thứ ba.
  */
 
-import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { INDUSTRIES, TAGS_FILE, describingExcerpt, loadRefs } from './design-refs.mjs';
+import { INDUSTRIES, TAGS_FILE, describingExcerpt, excerptHash, loadRefs } from './design-refs.mjs';
 
 const JEV_ENDPOINT = process.env.TQD_JEV_ENDPOINT || 'https://api.typesafe.ai/v1/systemone';
 const JEV_MODEL = 'jev-latest';
@@ -146,9 +145,10 @@ let reused = 0;
 let stale = 0;
 for (const ref of loaded.refs) {
   const name = path.basename(ref.file);
-  const excerpt = describingExcerpt(readFileSync(ref.file, 'utf8'));
+  const markdown = readFileSync(ref.file, 'utf8');
+  const excerpt = describingExcerpt(markdown);
   // Băm đúng phần sẽ gửi Jev: file sửa phần mô tả thì kết quả cũ cần phân loại lại.
-  const hash = createHash('sha256').update(excerpt).digest('hex').slice(0, 16);
+  const hash = excerptHash(markdown);
   const old = previous[name];
   if (old?.source === 'jev' && old.jev && typeof old.jev === 'object') {
     // Kết quả Jev đã trả phí không bao giờ bị xoá ở đây. Bản ghi cũ chưa có `hash`

@@ -359,6 +359,7 @@ function main() {
     result.references = {
       dir: refsDir,
       localTags: loadedRefs.tagged,
+      staleTags: loadedRefs.refs.filter((ref) => ref.tagStale).length,
       ...rankRefs(loadedRefs.refs, query, options.limit),
       note: 'Chỉ lấy cảm hứng cấu trúc (thang chữ, nhịp khoảng cách, kỷ luật màu); thay font bằng cặp có subset tiếng Việt, không chép tên, logo, ảnh, copy hay CSS nguyên văn. Xem references/external-design-md.md.',
     };
@@ -403,11 +404,12 @@ function main() {
   if (result.references) {
     const refs = result.references;
     lines.push('', `THAM KHẢO DESIGN.md NGOÀI (${refs.matches.length}/${refs.total} file; ${refs.withIndustry} file có thẻ ngành)`);
+    if (refs.staleTags) lines.push(`- ${refs.staleTags} file đổi mô tả sau lần gắn thẻ: đang dùng thẻ offline mới tính; chạy lại design-refs-tag.mjs.`);
     if (!refs.matches.length) lines.push('- Không file nào khớp; mô tả thêm ngành hoặc mood (ví dụ: "ấm áp", "tối giản", "nền tối").');
     for (const ref of refs.matches) {
       lines.push(
         `- ${ref.name}: ${ref.tagline || '(không có mô tả)'}`,
-        `  ${ref.theme || '?'} · ${ref.density || '?'} · thị giác: ${ref.visual.join(', ') || '—'} · ngành: ${ref.industries.join(', ')}${ref.tagSource ? ` (${ref.tagSource})` : ''}`,
+        `  ${ref.theme || '?'} · ${ref.density || '?'} · thị giác: ${ref.visual.join(', ') || '—'} · ngành: ${ref.industries.join(', ')}${ref.tagSource ? ` (${ref.tagSource}${ref.tagStale ? ', thẻ đã lưu đã cũ' : ''})` : ''}`,
         `  màu: ${ref.accents.join(' ') || '—'} · font gốc: ${ref.fonts.join(', ') || '—'}`,
         `  file: ${ref.file}`,
       );

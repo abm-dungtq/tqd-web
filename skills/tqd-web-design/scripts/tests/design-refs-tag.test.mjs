@@ -115,6 +115,25 @@ test('refs-tag: --jev sends only unknown files, only their description, and feed
     const ref = refs.matches.find((match) => match.name === 'Gallery Objects');
     assert.deepEqual(ref.industries, ['retail', 'creative']);
     assert.equal(ref.tagSource, 'jev');
+
+    // Sửa mô tả sau khi gắn thẻ: design-intel không được xếp hạng bằng thẻ Jev cũ như thẻ hiện hành,
+    // dù chưa chạy lại tagger hay đã chạy lại offline (bản ghi Jev được giữ trên đĩa với `stale`).
+    const file = path.join(dir, 'gallery-objects.md');
+    writeFileSync(file, readFileSync(file, 'utf8').replace('No people', 'Still no people'));
+    for (const retag of [false, true]) {
+      if (retag) {
+        assert.equal((await run(TAGGER, [dir])).status, 0);
+        assert.equal(readTags(dir).files['gallery-objects.md'].stale, true);
+      }
+      const edited = await run(INTEL, ['cửa hàng', '--refs', dir, '--json']);
+      assert.equal(edited.status, 0, edited.stderr);
+      const editedRefs = JSON.parse(edited.stdout).references;
+      assert.equal(editedRefs.staleTags, 1);
+      const staleRef = editedRefs.matches.find((match) => match.name === 'Gallery Objects');
+      assert.ok(!staleRef?.industries.includes('retail'), 'stale Jev industries never rank as current');
+      const text = await run(INTEL, ['cửa hàng', '--refs', dir]);
+      assert.match(text.stdout, /1 file đổi mô tả sau lần gắn thẻ/);
+    }
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

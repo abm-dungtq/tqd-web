@@ -7,6 +7,7 @@
  * như "gallery wall of black-on-white objects" vẫn dùng được cho nhiều ngành.
  */
 
+import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 
@@ -99,6 +100,11 @@ export function describingExcerpt(markdown, limit = 2000) {
   return [intro, section(markdown, 'Imagery')].join('\n').replace(/\n{3,}/g, '\n\n').trim().slice(0, limit);
 }
 
+/** Băm phần mô tả; `local-tags.json` lưu giá trị này để biết thẻ còn khớp file hay không. */
+export function excerptHash(markdown) {
+  return createHash('sha256').update(describingExcerpt(markdown)).digest('hex').slice(0, 16);
+}
+
 export function parseDesignMd(markdown, file) {
   const name = (markdown.match(/^# (.+?)(?:\s+—\s+Style Reference)?\s*$/m) || [])[1]?.trim()
     || path.basename(file, '.md');
@@ -160,11 +166,19 @@ export function loadRefs(dir, { useLocalTags = true } = {}) {
     const file = path.join(dir, entry);
     const stats = statSync(file);
     if (!stats.isFile() || stats.size > MAX_FILE_BYTES) continue;
-    const ref = parseDesignMd(readFileSync(file, 'utf8'), file);
+    const markdown = readFileSync(file, 'utf8');
+    const ref = parseDesignMd(markdown, file);
     const saved = tags?.[entry];
     if (Array.isArray(saved?.industries) && saved.industries.length) {
-      ref.industries = saved.industries;
-      ref.tagSource = saved.source || TAGS_FILE;
+      // Mô tả đã đổi sau lần gắn thẻ: giữ thẻ offline mới tính, báo thẻ đã lưu là cũ.
+      // Bản ghi chưa có `hash` (trước 1de2f09) được coi là khớp, như design-refs-tag.
+      if (saved.stale || (saved.hash && saved.hash !== excerptHash(markdown))) {
+        ref.tagSource = 'offline';
+        ref.tagStale = `thẻ ${saved.source || TAGS_FILE} trong ${TAGS_FILE} đã cũ vì mô tả file đổi; chạy lại design-refs-tag.mjs`;
+      } else {
+        ref.industries = saved.industries;
+        ref.tagSource = saved.source || TAGS_FILE;
+      }
     }
     refs.push(ref);
   }
