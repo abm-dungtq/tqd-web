@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "TQD Web Studio marketplace — thiết kế và xuất bản website từ A-Z cho người không biết lập trình",
-    "version": "2.4.0"
+    "version": "2.4.1"
   },
   "plugins": [
     {
       "name": "tqd-web",
       "source": "./",
       "description": "Thiết kế website chất lượng cao từ A-Z cho người không biết code",
-      "version": "2.4.0",
+      "version": "2.4.1",
       "repository": "https://github.com/abm-dungtq/tqd-web"
     }
   ]

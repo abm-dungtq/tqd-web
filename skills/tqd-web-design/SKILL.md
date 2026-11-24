@@ -7,7 +7,7 @@ compatibility: "macOS, Linux, Windows (Node.js >= 22)"
 license: "MIT"
 metadata:
   author: tqd
-  version: "2.4.0"
+  version: "2.4.1"
 ---
 
 # TQD Web Design: Visual Identity, Tokens, and Art-Directed UI
