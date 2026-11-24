@@ -35,8 +35,8 @@ node "${CLAUDE_SKILL_DIR}/scripts/design-refs-tag.mjs" "/đường/dẫn/ngoài/
 - `--jev` (tắt mặc định) gửi các file còn `unknown` cho TypeSafe Jev (`POST https://api.typesafe.ai/v1/systemone`, model `jev-latest`, cần `TYPESAFE_API_KEY`). Mỗi ngành là một câu hỏi noul riêng; nhận ngành khi xác suất ≥ `--threshold` (mặc định 0.7), nên một style có thể có nhiều ngành.
   - Chỉ gửi tên, câu tóm tắt, đoạn mô tả và `## Imagery` (≤ 2.000 ký tự/file); không gửi token, CSS hay HTML mẫu.
   - **Chỉ bật khi người giữ file đã xác nhận được phép gửi nội dung cho bên thứ ba.** Có phí theo token của TypeSafe.
-  - File gọi lỗi giữ thẻ offline kèm `jevError`; script vẫn ghi kết quả và thoát mã 1.
-  - Chạy lại (offline hay `--jev`) giữ nguyên kết quả Jev cũ nếu phần mô tả của file không đổi (so bằng `hash`); `--jev` chỉ gửi file mới, file đã sửa mô tả và file lỗi lần trước. `local-tags.json` hỏng thì script dừng (mã 1), không ghi đè. File được ghi tạm rồi đổi tên nên ngắt giữa chừng không làm hỏng bản cũ.
+  - File gọi lỗi giữ thẻ đang có (offline, hoặc kết quả Jev cũ nếu file đang stale) kèm `jevError`; script vẫn ghi kết quả và thoát mã 1.
+  - Chạy lại (offline hay `--jev`) không bao giờ xoá kết quả Jev đã có. Phần mô tả không đổi (so bằng `hash`) thì dùng lại. Đã đổi thì giữ kết quả cũ, gắn `"stale": true`; chỉ `--jev` gọi thành công mới thay nó. Bản ghi Jev cũ chưa có `hash` được coi là khớp và gắn hash ở lần chạy đầu. `--jev` chỉ gửi file mới `unknown`, file stale và file lỗi lần trước. `local-tags.json` hỏng thì script dừng (mã 1), không ghi đè. File được ghi tạm rồi đổi tên nên ngắt giữa chừng không làm hỏng bản cũ.
   - Đường gọi Jev chỉ được test với server giả trong repo; chưa kiểm chứng với API thật.
 
 ## Chuyển thành thiết kế của khách

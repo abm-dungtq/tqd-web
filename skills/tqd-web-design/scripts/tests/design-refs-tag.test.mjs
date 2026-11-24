@@ -144,11 +144,49 @@ test('refs-tag: reruns keep paid Jev results, resend only changed or failed file
 
     const file = path.join(dir, 'gallery-objects.md');
     writeFileSync(file, readFileSync(file, 'utf8').replace('Still no people', 'No people at all'));
+    const offlineAfterEdit = await run(TAGGER, [dir]);
+    assert.equal(offlineAfterEdit.status, 0, offlineAfterEdit.stderr);
+    const kept = readTags(dir).files['gallery-objects.md'];
+    assert.equal(kept.source, 'jev', 'an offline rerun never drops a paid result');
+    assert.equal(kept.stale, true);
+    assert.deepEqual(kept.industries, ['retail']);
+
     assert.equal((await run(TAGGER, [dir, '--jev'], env('http://127.0.0.1:9/closed'))).status, 1);
-    assert.ok(readTags(dir).files['gallery-objects.md'].jevError);
+    const failedEntry = readTags(dir).files['gallery-objects.md'];
+    assert.ok(failedEntry.jevError);
+    assert.equal(failedEntry.source, 'jev', 'a failed re-classification keeps the old paid result');
     await withJevMock(() => 0.9, async (endpoint, requests) => {
       assert.equal((await run(TAGGER, [dir, '--jev'], env(endpoint))).status, 0);
       assert.equal(requests.length, 1, 'a failed file is retried');
+      assert.equal(readTags(dir).files['gallery-objects.md'].stale, undefined);
+    });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// Định dạng do bản 5dded3d ghi: có kết quả Jev nhưng chưa có trường `hash`.
+test('refs-tag: Jev entries written before hashes existed survive an offline rerun', async () => {
+  const dir = copyFixtures();
+  try {
+    const jev = { fnb: 0.1, beauty: 0.1, wellness: 0.1, health: 0.1, fitness: 0.1, hospitality: 0.1, retail: 0.92,
+      fashion: 0.1, education: 0.1, realestate: 0.1, finance: 0.1, software: 0.1, creative: 0.81 };
+    writeFileSync(path.join(dir, 'local-tags.json'), JSON.stringify({
+      version: 1,
+      counts: { retail: 1, creative: 1 },
+      files: { 'gallery-objects.md': { industries: ['retail', 'creative'], visual: ['minimal'], source: 'jev', jev } },
+    }));
+    await withJevMock(() => 0.9, async (endpoint, requests) => {
+      const offline = await run(TAGGER, [dir], { TQD_JEV_ENDPOINT: endpoint, TYPESAFE_API_KEY: 'k' });
+      assert.equal(offline.status, 0, offline.stderr);
+      const entry = readTags(dir).files['gallery-objects.md'];
+      assert.equal(entry.source, 'jev');
+      assert.deepEqual(entry.industries, ['retail', 'creative']);
+      assert.deepEqual(entry.jev, jev);
+      assert.match(entry.hash, /^[0-9a-f]{16}$/);
+
+      assert.equal((await run(TAGGER, [dir, '--jev'], { TQD_JEV_ENDPOINT: endpoint, TYPESAFE_API_KEY: 'k' })).status, 0);
+      assert.equal(requests.length, 0, 'an adopted legacy result is not re-sent');
     });
   } finally {
     rmSync(dir, { recursive: true, force: true });

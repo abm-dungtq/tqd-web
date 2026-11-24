@@ -99,16 +99,18 @@ function jevIndustries(scores, threshold) {
 
 async function tagWithJev(pending, files, options) {
   const apiKey = process.env.TYPESAFE_API_KEY;
-  console.error(`Jev: gửi ${pending.length} file unknown chưa có kết quả Jev tới ${JEV_ENDPOINT}`);
+  console.error(`Jev: gửi ${pending.length} file (unknown hoặc đã đổi mô tả) tới ${JEV_ENDPOINT}`);
   let failed = 0;
   let next = 0;
   async function worker() {
     while (next < pending.length) {
-      const { name, excerpt } = pending[next++];
+      const { name, excerpt, hash } = pending[next++];
       const entry = files[name];
       try {
         const scores = await askJev(apiKey, excerpt);
-        Object.assign(entry, { industries: jevIndustries(scores, options.threshold), source: 'jev', jev: scores });
+        Object.assign(entry, { industries: jevIndustries(scores, options.threshold), source: 'jev', hash, jev: scores });
+        delete entry.stale;
+        delete entry.jevError;
       } catch (error) {
         failed += 1;
         entry.jevError = error.message;
@@ -141,19 +143,30 @@ const previous = readPrevious(output);
 const files = {};
 const pending = [];
 let reused = 0;
+let stale = 0;
 for (const ref of loaded.refs) {
   const name = path.basename(ref.file);
   const excerpt = describingExcerpt(readFileSync(ref.file, 'utf8'));
-  // Băm đúng phần sẽ gửi Jev: file sửa phần mô tả thì kết quả cũ không còn dùng được.
+  // Băm đúng phần sẽ gửi Jev: file sửa phần mô tả thì kết quả cũ cần phân loại lại.
   const hash = createHash('sha256').update(excerpt).digest('hex').slice(0, 16);
   const old = previous[name];
-  if (old?.source === 'jev' && old.hash === hash && old.jev && typeof old.jev === 'object') {
-    files[name] = { industries: jevIndustries(old.jev, options.threshold), visual: ref.visual, source: 'jev', hash, jev: old.jev };
-    reused += 1;
+  if (old?.source === 'jev' && old.jev && typeof old.jev === 'object') {
+    // Kết quả Jev đã trả phí không bao giờ bị xoá ở đây. Bản ghi cũ chưa có `hash`
+    // (bản 5dded3d) được coi là khớp nội dung hiện tại và gắn hash từ lần này.
+    const oldHash = old.hash || hash;
+    files[name] = { industries: jevIndustries(old.jev, options.threshold), visual: ref.visual, source: 'jev', hash: oldHash, jev: old.jev };
+    if (oldHash === hash) {
+      reused += 1;
+    } else {
+      // Mô tả đã đổi: giữ kết quả cũ, đánh dấu `stale`; chỉ `--jev` thay nó khi gọi thành công.
+      files[name].stale = true;
+      stale += 1;
+      pending.push({ name, excerpt, hash });
+    }
     continue;
   }
   files[name] = { industries: ref.industries, visual: ref.visual, source: 'offline', hash };
-  if (ref.industries[0] === 'unknown') pending.push({ name, excerpt });
+  if (ref.industries[0] === 'unknown') pending.push({ name, excerpt, hash });
 }
 const jev = options.jev ? await tagWithJev(pending, files, options) : null;
 const counts = {};
@@ -170,6 +183,6 @@ writeFileSync(temp, `${JSON.stringify({
 renameSync(temp, output);
 
 const total = loaded.refs.length;
-console.log(`Đã ghi ${output}: ${total} file, unknown ${counts.unknown || 0} (${Math.round(((counts.unknown || 0) / total) * 100)}%); giữ lại ${reused} kết quả Jev cũ`);
+console.log(`Đã ghi ${output}: ${total} file, unknown ${counts.unknown || 0} (${Math.round(((counts.unknown || 0) / total) * 100)}%); giữ lại ${reused} kết quả Jev cũ${stale ? `, ${stale} kết quả Jev cũ đã đổi mô tả (stale, chạy --jev để phân loại lại)` : ''}`);
 if (jev) console.log(`Jev: đã gửi ${jev.sent}, lỗi ${jev.failed}`);
 process.exit(jev?.failed ? 1 : 0);
